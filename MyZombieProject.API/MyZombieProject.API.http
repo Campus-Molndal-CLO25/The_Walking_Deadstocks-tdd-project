@@ -1,0 +1,6 @@
+@MyZombieProject.API_HostAddress = http://localhost:5016
+
+GET {{MyZombieProject.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
