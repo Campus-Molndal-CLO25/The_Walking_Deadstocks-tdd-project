@@ -1,14 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11312.210 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyZombieProject", "MyZombieProject\MyZombieProject.csproj", "{8D56DE2B-5A6B-4F23-9783-6B0B716DE05F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyZombieProject.Test", "MyZombieProject.Test\MyZombieProject.Test.csproj", "{434F6ACB-FDF4-4697-AD10-93859812DD1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D56DE2B-5A6B-4F23-9783-6B0B716DE05F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D56DE2B-5A6B-4F23-9783-6B0B716DE05F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D56DE2B-5A6B-4F23-9783-6B0B716DE05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D56DE2B-5A6B-4F23-9783-6B0B716DE05F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{434F6ACB-FDF4-4697-AD10-93859812DD1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{434F6ACB-FDF4-4697-AD10-93859812DD1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{434F6ACB-FDF4-4697-AD10-93859812DD1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{434F6ACB-FDF4-4697-AD10-93859812DD1D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B58FAB7-330C-406D-8C02-E29700FBFE71}
 	EndGlobalSection
 EndGlobal
