@@ -1,0 +1,30 @@
+name: Build & Test Main and Dev 
+
+on:
+  push:
+    branches: [ "main", "Dev" ]
+  pull_request:
+    branches: [ "main", "Dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+        include-prerelease: true   # behövs om .NET 10 är preview
+
+    - name: Restore
+      run: dotnet restore MyZombieProject.sln
+
+    - name: Build
+      run: dotnet build MyZombieProject.sln --no-restore
+
+    - name: Test
+      run: dotnet test MyZombieProject.sln --no-build
