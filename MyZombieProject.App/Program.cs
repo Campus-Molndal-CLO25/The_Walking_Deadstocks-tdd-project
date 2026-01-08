@@ -1,4 +1,6 @@
-using MyZombieProject.App.Components;
+using Microsoft.EntityFrameworkCore;
+using MyZombieProject.App.Datalayer;
+
 
 namespace MyZombieProject.App
 {
@@ -7,6 +9,10 @@ namespace MyZombieProject.App
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<MyZombieDataContext>(options =>
+                options.UseSqlServer(
+                builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
             builder.Services.AddRazorComponents()
