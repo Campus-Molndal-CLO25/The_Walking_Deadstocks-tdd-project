@@ -10,6 +10,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User_Stories", "User_Stories", "{320D98E2-E346-4A92-99BB-92F895BE095A}"
+	ProjectSection(SolutionItems) = preProject
+		US21-add-resources.md = US21-add-resources.md
+		US22-use-resources.md = US22-use-resources.md
+		US23-list-storage.md = US23-list-storage.md
+		US24-low-level-warning.md = US24-low-level-warning.md
+		US25-add-shelters.md = US25-add-shelters.md
+		US27-connect-survivour-to-shelter.md = US27-connect-survivour-to-shelter.md
+		US28-create-supplyrun.md = US28-create-supplyrun.md
+		US26-register-survivours.md = US26-register-survivours.md
+		US29-calculate-days-to-starvation.md = US29-calculate-days-to-starvation.md
+		US30-weatherforcast.md = US30-weatherforcast.md
+		US31-generate-survivaltips.md = US31-generate-survivaltips.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprint_Planning", "Sprint_Planning", "{DCCC8590-42BF-484D-8D4C-08789565D2A3}"
 EndProject
