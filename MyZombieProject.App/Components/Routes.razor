@@ -1,6 +1,16 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿@using MyZombieProject.App
+@using MyZombieProject.App.Shared 
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <RouteView RouteData="@routeData"
+                   DefaultLayout="@typeof(RetroLayout)" />
     </Found>
+
+    <NotFound>
+        <LayoutView Layout="@typeof(RetroLayout)">
+            <p>ERROR 404: FILE NOT FOUND</p>
+        </LayoutView>
+    </NotFound>
 </Router>
+

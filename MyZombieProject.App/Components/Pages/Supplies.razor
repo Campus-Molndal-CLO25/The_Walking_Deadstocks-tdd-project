@@ -1,0 +1,52 @@
+﻿@page "/supplies"
+
+<h1 class="retro-title">SUPPLY MANAGEMENT</h1>
+
+<div class="retro-panel">
+    <p>> MANAGING CLAN RESOURCES</p>
+</div>
+
+<table class="retro-table">
+    <thead>
+        <tr>
+            <th>TYPE</th>
+            <th>AMOUNT</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>FOOD</td>
+            <td>120</td>
+            <td>OK</td>
+            <td>
+                <button class="retro-btn">[ + ADD ]</button>
+                <button class="retro-btn">[ - USE ]</button>
+            </td>
+        </tr>
+        <tr>
+            <td>AMMO</td>
+            <td>340</td>
+            <td>OK</td>
+            <td>
+                <button class="retro-btn">[ + ADD ]</button>
+                <button class="retro-btn">[ - USE ]</button>
+            </td>
+        </tr>
+        <tr class="critical">
+            <td>MEDICINE</td>
+            <td>12</td>
+            <td>LOW</td>
+            <td>
+                <button class="retro-btn">[ + ADD ]</button>
+                <button class="retro-btn">[ - USE ]</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="retro-panel">
+    <p class="blink">> WARNING: MEDICINE SUPPLY CRITICAL</p>
+</div>
+

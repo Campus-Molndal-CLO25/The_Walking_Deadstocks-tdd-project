@@ -1,0 +1,24 @@
+﻿@namespace MyZombieProject.App.Shared
+@using MyZombieProject.App.Shared
+@inherits LayoutComponentBase
+
+<div class="retro-frame">
+    <header class="retro-header">
+        <pre>
+MY ZOMBIE PROJECT v1.0
+STATUS: ONLINE
+DATE: @DateTime.Now.ToShortDateString()
+        </pre>
+        <RetroMenu />
+    </header>
+
+
+    <main class="retro-main">
+        @Body
+    </main>
+
+    <footer class="retro-panel">
+        <p>MY ZOMBIE PROJECT v0.1 — SYSTEM STABLE</p>
+    </footer>
+</div>
+

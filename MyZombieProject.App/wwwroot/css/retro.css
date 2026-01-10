@@ -1,0 +1,152 @@
+﻿body {
+    background-color: #000;
+    color: #00ff00;
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+}
+
+.retro-container {
+    border: 2px solid #00aa00;
+    padding: 10px;
+    max-width: 1000px;
+    margin: 20px auto;
+}
+
+.retro-menu {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px;
+    border-bottom: 2px solid #00ff00;
+    margin-bottom: 20px;
+}
+
+    .retro-menu a {
+        color: #00ff00;
+        text-decoration: none;
+        border: 2px solid #00ff00;
+        padding: 5px 10px;
+    }
+
+        .retro-menu a:hover {
+            background-color: #00ff00;
+            color: black;
+        }
+
+.retro-link.active {
+    background-color: #00ff00;
+    color: black;
+}
+
+
+.retro-content {
+    margin-top: 10px;
+    border-top: 1px solid #00aa00;
+    padding-top: 10px;
+}
+
+input, select, button {
+    background-color: #000;
+    color: #00ff00;
+    border: 1px solid #00aa00;
+    font-family: inherit;
+}
+
+    button:hover {
+        background-color: #003300;
+    }
+
+.warning {
+    color: #ff3333;
+    font-weight: bold;
+}
+
+.critical {
+    color: red;
+    border-color: red;
+}
+
+.blink {
+    animation: blink 1s steps(2, start) infinite;
+}
+
+* {
+    border-radius: 0 !important;
+}
+
+.retro-frame {
+    border: 3px double #00aa00;
+    padding: 10px;
+}
+
+.retro-header pre,
+.retro-footer pre {
+    margin: 0;
+    color: #00ff00;
+}
+
+.retro-main {
+    padding: 10px;
+    min-height: 400px;
+}
+
+.retro-title {
+    text-align: center;
+    border-bottom: 2px solid #00ff00;
+    padding-bottom: 10px;
+}
+
+.retro-panel {
+    border: 2px solid #00ff00;
+    padding: 10px;
+    margin: 15px 0;
+}
+
+.retro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.retro-box {
+    border: 2px solid #00ff00;
+    padding: 10px;
+}
+
+.retro-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+    .retro-table th,
+    .retro-table td {
+        border: 2px solid #00ff00;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .retro-table th {
+        background-color: #003300;
+    }
+
+.retro-btn {
+    background-color: black;
+    color: #00ff00;
+    border: 2px solid #00ff00;
+    padding: 3px 8px;
+    margin: 2px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+    .retro-btn:hover {
+        background-color: #00ff00;
+        color: black;
+    }
+
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
