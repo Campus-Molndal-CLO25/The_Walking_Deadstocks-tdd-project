@@ -1,64 +1,44 @@
-﻿@page "/weather"
-@attribute [StreamRendering]
+﻿@page "/shelters"
 
-<PageTitle>Weather</PageTitle>
+<h1 class="retro-title">SHELTER REGISTRY</h1>
 
-<h1>Weather</h1>
+<div class="retro-panel">
+    <p>> ACTIVE SHELTERS</p>
+</div>
 
-<p>This component demonstrates showing data.</p>
+<table class="retro-table">
+    <thead>
+        <tr>
+            <th>NAME</th>
+            <th>LOCATION</th>
+            <th>CAPACITY</th>
+            <th>SURVIVORS</th>
+            <th>ACTIONS</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Alpha Base</td>
+            <td>North Zone</td>
+            <td>20</td>
+            <td>15</td>
+            <td>
+                <button class="retro-btn">[ VIEW ]</button>
+            </td>
+        </tr>
+        <tr class="critical">
+            <td>Outpost Z</td>
+            <td>East Sector</td>
+            <td>10</td>
+            <td>10</td>
+            <td>
+                <button class="retro-btn">[ VIEW ]</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<div class="retro-panel">
+    <button class="retro-btn">[ + ADD SHELTER ]</button>
+</div>
 
-@code {
-    private WeatherForecast[]? forecasts;
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
-    }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
-}

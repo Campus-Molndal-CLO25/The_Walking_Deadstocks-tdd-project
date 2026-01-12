@@ -1,5 +1,36 @@
-﻿<h3>Survivors</h3>
+﻿@page "/survivors"
 
-@code {
+<h1 class="retro-title">SURVIVOR DATABASE</h1>
 
-}
+<table class="retro-table">
+    <thead>
+        <tr>
+            <th>NAME</th>
+            <th>AGE</th>
+            <th>SHELTER</th>
+            <th>ACTIONS</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Alex</td>
+            <td>34</td>
+            <td>Alpha Base</td>
+            <td>
+                <button class="retro-btn">[ MOVE ]</button>
+            </td>
+        </tr>
+        <tr>
+            <td>Sam</td>
+            <td>12</td>
+            <td>Outpost Z</td>
+            <td>
+                <button class="retro-btn">[ MOVE ]</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="retro-panel">
+    <button class="retro-btn">[ + ADD SURVIVOR ]</button>
+</div>

@@ -45,6 +45,55 @@
     padding-top: 10px;
 }
 
+
+    
+    .retro-modal h3, .retro-modal p {
+        color: #00ff00;
+        text-transform: uppercase;
+    }
+
+
+.retro-input {
+    background: transparent;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 5px;
+}
+
+
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.retro-modal {
+    background: #000;
+    border: 5px solid #00ff00; 
+    padding: 40px;
+    min-width: 400px;
+    box-shadow: 0 0 30px #00ff00;
+    color: #00ff00;
+}
+
+.retro-btn {
+    cursor: pointer; 
+}
+.modal-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
 input, select, button {
     background-color: #000;
     color: #00ff00;

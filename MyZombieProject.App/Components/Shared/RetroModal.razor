@@ -1,0 +1,56 @@
+﻿@if (IsOpen)
+{
+    <style>
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .retro-modal {
+            background-color: #000;
+            border: 2px solid #00ff00;
+            padding: 30px;
+            min-width: 350px;
+            box-shadow: 0 0 20px #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+
+    <div class="modal-backdrop">
+        <div class="retro-modal">
+            <h3>@Title</h3>
+
+            <div class="modal-content">
+                @ChildContent
+            </div>
+
+            <div class="modal-actions">
+                <button class="retro-btn" @onclick="OnConfirm">[ OK ]</button>
+                <button class="retro-btn" @onclick="OnClose">[ CANCEL ]</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Title { get; set; } = "MODAL";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

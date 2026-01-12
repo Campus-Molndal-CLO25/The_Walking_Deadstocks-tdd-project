@@ -1,10 +1,17 @@
 ﻿@page "/supplies"
+@using MyZombieProject.App.Shared
+@using MyZombieProject.App.Components.Shared
+@rendermode InteractiveServer
 
-<h1 class="retro-title">SUPPLY MANAGEMENT</h1>
+<h1 class="retro-title">SUPPLY MANAGEMENT (@showAddModal)</h1>
 
 <div class="retro-panel">
     <p>> MANAGING CLAN RESOURCES</p>
 </div>
+
+<button class="retro-btn" @onclick="OpenModal">
+    [ + ADD SUPPLY ]
+</button>
 
 <table class="retro-table">
     <thead>
@@ -49,4 +56,34 @@
 <div class="retro-panel">
     <p class="blink">> WARNING: MEDICINE SUPPLY CRITICAL</p>
 </div>
+
+
+<RetroModal IsOpen="@showAddModal" 
+            Title="ADD SUPPLY" 
+            OnClose="CloseModal" 
+            OnConfirm="ConfirmAdd">
+            
+    <p>SUPPLY TYPE:</p>
+    <select class="retro-input">
+        <option>Food</option>
+        <option>Ammo</option>
+        <option>Medicine</option>
+    </select>
+
+    <p>AMOUNT:</p>
+    <input type="number" class="retro-input" />
+</RetroModal>
+
+
+
+@code {
+    bool showAddModal = false;
+    void OpenModal()
+    {
+        showAddModal = true;
+        StateHasChanged(); // Tvingar Blazor att kolla efter ändringar
+    }
+    void CloseModal() => showAddModal = false;
+    void ConfirmAdd() => showAddModal = false;
+}
 
