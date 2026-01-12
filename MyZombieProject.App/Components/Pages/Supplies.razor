@@ -1,6 +1,9 @@
 ﻿@page "/supplies"
 @using MyZombieProject.App.Shared
 @using MyZombieProject.App.Components.Shared
+@using MyZombieProject.App.Datalayer.Repositories
+@using MyZombieProject.App.Models
+@inject SupplyRepository SupplyRepo
 @rendermode InteractiveServer
 
 <h1 class="retro-title">SUPPLY MANAGEMENT (@showAddModal)</h1>
@@ -23,33 +26,18 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>FOOD</td>
-            <td>120</td>
-            <td>OK</td>
-            <td>
-                <button class="retro-btn">[ + ADD ]</button>
-                <button class="retro-btn">[ - USE ]</button>
-            </td>
-        </tr>
-        <tr>
-            <td>AMMO</td>
-            <td>340</td>
-            <td>OK</td>
-            <td>
-                <button class="retro-btn">[ + ADD ]</button>
-                <button class="retro-btn">[ - USE ]</button>
-            </td>
-        </tr>
-        <tr class="critical">
-            <td>MEDICINE</td>
-            <td>12</td>
-            <td>LOW</td>
-            <td>
-                <button class="retro-btn">[ + ADD ]</button>
-                <button class="retro-btn">[ - USE ]</button>
-            </td>
-        </tr>
+        @foreach (var item in supplies)
+        {
+            <tr class="@(item.AmountInStock < 20 ? "critical" : "")">
+                <td>@item.Type</td> 
+                <td>@item.AmountInStock</td>
+                <td>@(item.AmountInStock < 20 ? "LOW" : "OK")</td>
+                <td>
+                    <button class="retro-btn">[ + ADD ]</button>
+                    <button class="retro-btn">[ - USE ]</button>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
@@ -58,32 +46,59 @@
 </div>
 
 
-<RetroModal IsOpen="@showAddModal" 
-            Title="ADD SUPPLY" 
-            OnClose="CloseModal" 
-            OnConfirm="ConfirmAdd">
-            
+<RetroModal IsOpen="@showAddModal" Title="ADD SUPPLY" OnClose="CloseModal" OnConfirm="ConfirmAdd">
+
     <p>SUPPLY TYPE:</p>
-    <select class="retro-input">
-        <option>Food</option>
-        <option>Ammo</option>
-        <option>Medicine</option>
+    <select class="retro-input" @bind="newSupply.Type">
+        @foreach (var type in Enum.GetValues(typeof(SupplyType)))
+        {
+            <option value="@type">@type</option>
+        }
     </select>
 
+    <p>ITEM NAME (e.g. "Canned Beans"):</p>
+    <input type="text" class="retro-input" @bind="newSupply.Name" />
+
     <p>AMOUNT:</p>
-    <input type="number" class="retro-input" />
+    <input type="number" class="retro-input" @bind="newSupply.AmountInStock" />
 </RetroModal>
 
 
 
 @code {
     bool showAddModal = false;
+    private List<Supply> supplies = new();
+
+   
+    private Supply newSupply = new Supply();
+
+    protected override void OnInitialized()
+    {
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        supplies = SupplyRepo.GetAllSupplies();
+    }
+
     void OpenModal()
     {
+        newSupply = new Supply(); // Nollställ formuläret
         showAddModal = true;
-        StateHasChanged(); // Tvingar Blazor att kolla efter ändringar
     }
+
     void CloseModal() => showAddModal = false;
-    void ConfirmAdd() => showAddModal = false;
+
+    void ConfirmAdd()
+    {
+       
+        SupplyRepo.Add(newSupply);
+
+        showAddModal = false;
+
+        RefreshData();
+    }
 }
+
 
