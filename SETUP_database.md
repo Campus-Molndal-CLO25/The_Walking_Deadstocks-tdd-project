@@ -17,7 +17,7 @@ utan att behöva använda kommandoprompten.
 ### 2️⃣ Öppna Package Manager Console (PMC)
 
 1. Gå till **Tools → NuGet Package Manager → Package Manager Console**.  
-2. Välj **Default Project** till ditt **App-projekt** (där `DbContext` finns).  
+2. Välj **MyZombieProjecr.App** som Default project (där `DbContext` finns).  
 
 ---
 
