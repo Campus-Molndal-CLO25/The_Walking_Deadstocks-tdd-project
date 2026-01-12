@@ -1,4 +1,11 @@
 ﻿@page "/survivors"
+@using MyZombieProject.App.Models
+@using MyZombieProject.App.Datalayer.Repositories
+@using MyZombieProject.App.Shared
+@using MyZombieProject.App.Components.Shared
+@inject SurvivorRepository SurvivorRepo
+@inject ShelterRepository ShelterRepo
+@rendermode InteractiveServer
 
 <h1 class="retro-title">SURVIVOR DATABASE</h1>
 
@@ -7,30 +14,76 @@
         <tr>
             <th>NAME</th>
             <th>AGE</th>
-            <th>SHELTER</th>
+            <th>ASSIGNED SHELTER</th>
             <th>ACTIONS</th>
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>Alex</td>
-            <td>34</td>
-            <td>Alpha Base</td>
-            <td>
-                <button class="retro-btn">[ MOVE ]</button>
-            </td>
-        </tr>
-        <tr>
-            <td>Sam</td>
-            <td>12</td>
-            <td>Outpost Z</td>
-            <td>
-                <button class="retro-btn">[ MOVE ]</button>
-            </td>
-        </tr>
+        @foreach (var person in survivors)
+        {
+            <tr>
+                <td>@person.Name</td>
+                <td>@person.Age</td>
+                <td>@(person.Shelter?.Name ?? "WANDERER")</td>
+                <td>
+                    <button class="retro-btn">[ EDIT ]</button>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
 <div class="retro-panel">
-    <button class="retro-btn">[ + ADD SURVIVOR ]</button>
+    <button class="retro-btn" @onclick="OpenModal">[ + ADD SURVIVOR ]</button>
 </div>
+
+<RetroModal IsOpen="@showAddModal" Title="REGISTER SURVIVOR" OnClose="CloseModal" OnConfirm="ConfirmAdd">
+    <p>NAME:</p>
+    <input type="text" class="retro-input" @bind="newSurvivor.Name" />
+
+    <p>AGE:</p>
+    <input type="number" class="retro-input" @bind="newSurvivor.Age" />
+
+    <p>ASSIGN TO SHELTER:</p>
+    <select class="retro-input" @bind="newSurvivor.ShelterId">
+        <option value="">-- NO SHELTER (WANDERER) --</option>
+        @foreach (var s in availableShelters)
+        {
+            <option value="@s.Id">@s.Name</option>
+        }
+    </select>
+</RetroModal>
+
+@code {
+    private List<Survivor> survivors = new();
+    private List<Shelter> availableShelters = new();
+    private bool showAddModal = false;
+    private Survivor newSurvivor = new Survivor();
+
+    protected override void OnInitialized()
+    {
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        // Vi gissar på Karins namngivning igen:
+        survivors = SurvivorRepo.GetAllSurvivors();
+        availableShelters = ShelterRepo.GetAllShelters();
+    }
+
+    void OpenModal()
+    {
+        newSurvivor = new Survivor();
+        showAddModal = true;
+    }
+
+    void CloseModal() => showAddModal = false;
+
+    void ConfirmAdd()
+    {
+        SurvivorRepo.Add(newSurvivor);
+        showAddModal = false;
+        RefreshData();
+    }
+}

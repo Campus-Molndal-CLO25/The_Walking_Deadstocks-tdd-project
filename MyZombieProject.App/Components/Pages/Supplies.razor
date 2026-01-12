@@ -6,7 +6,7 @@
 @inject SupplyRepository SupplyRepo
 @rendermode InteractiveServer
 
-<h1 class="retro-title">SUPPLY MANAGEMENT (@showAddModal)</h1>
+<h1 class="retro-title">SUPPLY MANAGEMENT</h1>
 
 <div class="retro-panel">
     <p>> MANAGING CLAN RESOURCES</p>
@@ -33,8 +33,8 @@
                 <td>@item.AmountInStock</td>
                 <td>@(item.AmountInStock < 20 ? "LOW" : "OK")</td>
                 <td>
-                    <button class="retro-btn">[ + ADD ]</button>
-                    <button class="retro-btn">[ - USE ]</button>
+                    <button class="retro-btn" @onclick="() => ChangeAmount(item, 1)">[ + ADD ]</button>
+                    <button class="retro-btn" @onclick="() => ChangeAmount(item, -1)">[ - USE ]</button>
                 </td>
             </tr>
         }
@@ -98,6 +98,17 @@
         showAddModal = false;
 
         RefreshData();
+    }
+
+    void ChangeAmount(Supply item, int change)
+    {
+        item.AmountInStock += change;
+
+        if (item.AmountInStock < 0) item.AmountInStock = 0;
+
+        SupplyRepo.Update(item);
+
+        StateHasChanged();
     }
 }
 

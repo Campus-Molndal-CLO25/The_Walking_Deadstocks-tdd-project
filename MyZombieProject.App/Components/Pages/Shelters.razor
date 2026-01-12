@@ -1,4 +1,10 @@
 ﻿@page "/shelters"
+@using MyZombieProject.App.Models
+@using MyZombieProject.App.Datalayer.Repositories
+@using MyZombieProject.App.Shared
+@using MyZombieProject.App.Components.Shared
+@inject ShelterRepository ShelterRepo
+@rendermode InteractiveServer
 
 <h1 class="retro-title">SHELTER REGISTRY</h1>
 
@@ -16,29 +22,63 @@
             <th>ACTIONS</th>
         </tr>
     </thead>
+    
     <tbody>
-        <tr>
-            <td>Alpha Base</td>
-            <td>North Zone</td>
-            <td>20</td>
-            <td>15</td>
-            <td>
-                <button class="retro-btn">[ VIEW ]</button>
-            </td>
-        </tr>
-        <tr class="critical">
-            <td>Outpost Z</td>
-            <td>East Sector</td>
-            <td>10</td>
-            <td>10</td>
-            <td>
-                <button class="retro-btn">[ VIEW ]</button>
-            </td>
-        </tr>
+        @foreach (var shelter in shelters)
+        {
+            <tr>
+                <td>@shelter.Name</td>
+                <td>@shelter.GpsCoordinates</td>
+                <td>--</td> @* Eftersom Capacity saknas i modellen än så länge *@
+                <td>@shelter.Survivors.Count</td>
+                <td>
+                    <button class="retro-btn">[ VIEW ]</button>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
 <div class="retro-panel">
-    <button class="retro-btn">[ + ADD SHELTER ]</button>
+    <button class="retro-btn" @onclick="OpenModal">[ + ADD SHELTER ]</button>
 </div>
+
+<RetroModal IsOpen="@showAddModal" Title="ADD SHELTER" OnClose="CloseModal" OnConfirm="ConfirmAdd">
+    <p>SHELTER NAME:</p>
+    <input type="text" class="retro-input" @bind="newShelter.Name" />
+
+    <p>GPS COORDINATES:</p>
+    <input type="text" class="retro-input" @bind="newShelter.GpsCoordinates" placeholder="e.g. 58.39, 13.86" />
+</RetroModal>
+
+@code {
+    private List<Shelter> shelters = new();
+    private bool showAddModal = false;
+    private Shelter newShelter = new Shelter();
+
+    protected override void OnInitialized()
+    {
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        shelters = ShelterRepo.GetAllShelters();
+    }
+
+    void OpenModal()
+    {
+        newShelter = new Shelter();
+        showAddModal = true;
+    }
+
+    void CloseModal() => showAddModal = false;
+
+    void ConfirmAdd()
+    {
+        ShelterRepo.Add(newShelter);
+        showAddModal = false;
+        RefreshData();
+    }
+}
 
