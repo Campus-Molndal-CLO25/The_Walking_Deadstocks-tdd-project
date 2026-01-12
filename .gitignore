@@ -1,0 +1,8 @@
+﻿bin/
+obj/
+.vs/
+settings.json
+appsettings.Development.json
+*.secrets.json
+Thumbs.db
+.DS_Store

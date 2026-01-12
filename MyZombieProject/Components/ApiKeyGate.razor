@@ -1,0 +1,82 @@
+﻿@using MyZombieProject.Services
+@inject AppSettingsStore SettingsStore
+@inject ApiKeyState KeyState
+
+@if (!_loaded)
+{
+    <p>Loading settings...</p>
+}
+else if (!KeyState.HasKey)
+{
+    <div style="max-width:520px; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <h3>First time setup</h3>
+        <p>Klistra in din OpenWeather API-nyckel. Den sparas lokalt på denna dator.</p>
+
+        <input style="width:100%;" placeholder="OpenWeather API key" @bind="_inputKey" />
+
+        <div style="margin-top:10px;">
+            <button @onclick="Save">Save</button>
+        </div>
+
+        <p style="margin-top:6px; font-size:0.9em; opacity:0.8;">@_status</p>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _loaded;
+    private string _inputKey = "";
+    private string _status = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var settings = await SettingsStore.LoadAsync();
+            if (!string.IsNullOrWhiteSpace(settings.OpenWeatherApiKey))
+                KeyState.Set(settings.OpenWeatherApiKey);
+
+            _loaded = true;
+        }
+        catch (Exception ex)
+        {
+            _status = "Init error: " + ex.Message;
+            _loaded = true;
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            _status = "Saving...";
+            await InvokeAsync(StateHasChanged);
+
+            if (string.IsNullOrWhiteSpace(_inputKey))
+            {
+                _status = "Du måste klistra in en nyckel.";
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            var settings = await SettingsStore.LoadAsync();
+            settings.OpenWeatherApiKey = _inputKey;
+            await SettingsStore.SaveAsync(settings);
+
+            KeyState.Set(_inputKey);
+
+            _status = "Saved ✔";
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            _status = "Save error: " + ex.Message;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
