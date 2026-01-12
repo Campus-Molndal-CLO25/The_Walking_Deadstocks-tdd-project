@@ -15,9 +15,9 @@ namespace MyZombieProject.App
                 options.UseSqlServer(
                 builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddScoped<SupplyRepository>();
-            builder.Services.AddScoped<SurvivorRepository>();
-            builder.Services.AddScoped<ShelterRepository>();
+            builder.Services.AddScoped<ISupplyRepository, SupplyRepository>();
+            builder.Services.AddScoped<ISurvivorRepository, SurvivorRepository>();
+            builder.Services.AddScoped<IShelterRepository, ShelterRepository>();
             builder.Services.AddScoped<DataFacade>();
 
             // Add services to the container.

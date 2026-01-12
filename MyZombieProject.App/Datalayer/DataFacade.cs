@@ -5,14 +5,14 @@ namespace MyZombieProject.App.Datalayer
 {
     public class DataFacade
     {
-        private readonly ShelterRepository _shelterRepository;
-        private readonly SurvivorRepository _survivorRepository;
-        private readonly SupplyRepository _supplyRepository;
+        private readonly IShelterRepository _shelterRepository;
+        private readonly ISurvivorRepository _survivorRepository;
+        private readonly ISupplyRepository _supplyRepository;
 
         public DataFacade(
-            ShelterRepository shelterRepository,
-            SurvivorRepository survivorRepository,
-            SupplyRepository supplyRepository)
+            IShelterRepository shelterRepository,
+            ISurvivorRepository survivorRepository,
+            ISupplyRepository supplyRepository)
         {
             _shelterRepository = shelterRepository;
             _survivorRepository = survivorRepository;
