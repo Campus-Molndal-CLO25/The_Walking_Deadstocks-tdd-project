@@ -8,6 +8,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User_Stories", "User_Stories", "{320D98E2-E346-4A92-99BB-92F895BE095A}"
+	ProjectSection(SolutionItems) = preProject
+		US21-add-resources.md = US21-add-resources.md
+		US22-use-resources.md = US22-use-resources.md
+		US23-list-storage.md = US23-list-storage.md
+		US24-low-level-warning.md = US24-low-level-warning.md
+		US25-add-shelters.md = US25-add-shelters.md
+		US26-register-survivours.md = US26-register-survivours.md
+		US27-connect-survivour-to-shelter.md = US27-connect-survivour-to-shelter.md
+		US28-create-supplyrun.md = US28-create-supplyrun.md
+		US29-calculate-days-to-starvation.md = US29-calculate-days-to-starvation.md
+		US30-weatherforcast.md = US30-weatherforcast.md
+		US31-generate-survivaltips.md = US31-generate-survivaltips.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprint_Planning", "Sprint_Planning", "{DCCC8590-42BF-484D-8D4C-08789565D2A3}"
 EndProject
@@ -18,6 +31,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflections", "Reflections", "{6D1AE31A-E186-461A-AC04-C9ACB51DC163}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyZombieProject.App", "MyZombieProject.App\MyZombieProject.App.csproj", "{FE7396E2-B7B9-4582-8B23-1D81BFDA6C3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QuickStart", "QuickStart", "{CC623CA2-0820-4FCF-9D2B-4611C697B269}"
+	ProjectSection(SolutionItems) = preProject
+		SETUP_database.md = SETUP_database.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +61,7 @@ Global
 		{EC47BAAE-063D-47B7-86FF-1929CFAFAB1E} = {BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}
 		{0ED572E4-ECA6-4FFC-A7AD-0D081ACAA1C7} = {BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}
 		{6D1AE31A-E186-461A-AC04-C9ACB51DC163} = {BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}
+		{CC623CA2-0820-4FCF-9D2B-4611C697B269} = {BCCEFD3B-DEA2-4168-9343-A48D396E8DB0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B58FAB7-330C-406D-8C02-E29700FBFE71}
