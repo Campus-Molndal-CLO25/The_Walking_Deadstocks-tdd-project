@@ -1,7 +1,6 @@
 ﻿namespace MyZombieProject.Test.DataLayer
 {
     using Microsoft.EntityFrameworkCore;
-    using MyZombieProject.App.Datalayer;
     using MyZombieProject.App.Datalayer.Repositories;
     using MyZombieProject.App.Models;
     using Xunit;
@@ -11,7 +10,7 @@
         [Fact]
         public void Add_Returns_Id()
         {
-            using var context = CreateZombieDataContext();
+            using var context = ZombieDataContextFactory.CreateZombieDataContext();
             var repository = new ShelterRepository(context);
 
             var shelter = new Shelter
@@ -26,9 +25,9 @@
         }
 
         [Fact]
-        public void GetById_Returns_Correct_Shelter()
+        public void GetById_Returns_Shelter()
         {
-            using var context = CreateZombieDataContext();
+            using var context = ZombieDataContextFactory.CreateZombieDataContext();
             var repository = new ShelterRepository(context);
             var shelter = new Shelter { Name = "Sumpmarken" };
             context.Shelters.Add(shelter);
@@ -43,7 +42,7 @@
         [Fact]
         public void GetAllShelters_Return_List()
         {
-            using var context = CreateZombieDataContext();
+            using var context = ZombieDataContextFactory.CreateZombieDataContext();
             var repository = new ShelterRepository(context);
             context.Shelters.AddRange(
                 new Shelter { Name = "Träsket" },
@@ -59,7 +58,7 @@
         [Fact]
         public void Update_Do_Update()
         {
-            using var context = CreateZombieDataContext();
+            using var context = ZombieDataContextFactory.CreateZombieDataContext();
             var repository = new ShelterRepository(context);
 
             var shelter = new Shelter { Name = "Träsket" };
@@ -74,9 +73,9 @@
         }
 
         [Fact]
-        public void Delete_Removes_Shelter_From_Database()
+        public void Delete_Do_Delete()
         {
-            using var context = CreateZombieDataContext();
+            using var context = ZombieDataContextFactory.CreateZombieDataContext();
             var repository = new ShelterRepository(context);
 
             var shelter = new Shelter { Name = "RödaRummet" };
@@ -86,15 +85,6 @@
             repository.Delete(shelter.Id);
 
             Assert.Empty(context.Shelters);
-        }
-
-        private MyZombieDataContext CreateZombieDataContext()
-        {
-            var options = new DbContextOptionsBuilder<MyZombieDataContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                .Options;
-
-            return new MyZombieDataContext(options);
         }
     }
 }
