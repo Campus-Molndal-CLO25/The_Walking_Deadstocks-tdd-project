@@ -1,19 +1,343 @@
 ﻿@page "/counter"
+@using MyZombieProject.App.Datalayer
+@using MyZombieProject.App.Models
 @rendermode InteractiveServer
+@inject DataFacade Data
 
-<PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
+<hr />
 
-<p role="status">Current count: @currentCount</p>
+<h1>Test av Shelters</h1>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<h3>@(editingShelter == null ? "Lägg till shelter" : "Uppdatera shelter")</h3>
 
-@code {
-    private int currentCount = 0;
+<input class="form-control mb-2"
+       placeholder="Shelter-namn"
+       @bind="newShelterName" />
 
-    private void IncrementCount()
+<input class="form-control mb-2"
+       placeholder="GPS-koordinater"
+       @bind="newShelterGps" />
+
+<button class="btn btn-success" @onclick="SaveShelter">
+    @(editingShelter == null ? "Lägg till shelter" : "Uppdatera shelter")
+</button>
+
+<hr />
+
+<h3>Befintliga shelters</h3>
+
+@if (!shelters.Any())
+{
+    <p>Inga shelters ännu.</p>
+}
+else
+{
+    @foreach (var shelter in shelters)
     {
-        currentCount++;
+        <div class="card mb-2">
+            <div class="card-body">
+                <h5 class="card-title">@shelter.Name</h5>
+                <p class="card-text"><b>GPS:</b> @shelter.GpsCoordinates</p>
+
+                <p><b>Survivors:</b></p>
+                @if (!shelter.Survivors.Any())
+                {
+                    <p class="text-muted">Inga survivors</p>
+                }
+                else
+                {
+                    <ul>
+                        @foreach (var survivor in shelter.Survivors)
+                        {
+                            <li>@survivor.Name</li>
+                        }
+                    </ul>
+                }
+
+                <button class="btn btn-primary btn-sm mt-2" @onclick="() => EditShelter(shelter)">
+                    Redigera
+                </button>
+            </div>
+        </div>
     }
 }
+
+<hr />
+
+<h1>Test av Supplies</h1>
+
+<h3>@(editingSupply == null ? "Lägg till Supply" : "Uppdatera Supply")</h3>
+
+<input class="form-control mb-2"
+       placeholder="Supply-namn"
+       @bind="newSupplyName" />
+
+<input type="number" class="form-control mb-2"
+       placeholder="Amount in stock"
+       @bind="newSupplyAmount" />
+
+<select class="form-control mb-2" @bind="newSupplyType">
+    @foreach (var type in Enum.GetValues<SupplyType>())
+    {
+        <option value="@type">@type</option>
+    }
+</select>
+
+<button class="btn btn-success" @onclick="SaveSupply">
+    @(editingSupply == null ? "Lägg till Supply" : "Uppdatera Supply")
+</button>
+
+<h3 class="mt-4">Befintliga Supplies</h3>
+
+@if (!supplies.Any())
+{
+    <p>Inga supplies ännu.</p>
+}
+else
+{
+    <ul>
+        @foreach (var supply in supplies)
+        {
+            <li>
+                <b>@supply.Name</b> - @supply.AmountInStock st (@supply.Type)
+                <button class="btn btn-primary btn-sm ms-2"
+                        @onclick="() => EditSupply(supply)">
+                    Redigera
+                </button>
+            </li>
+        }
+    </ul>
+}
+
+<hr />
+
+<h1>Test av Survivors</h1>
+
+<h3>@(editingSurvivor == null ? "Lägg till Survivor" : "Uppdatera Survivor")</h3>
+
+<input class="form-control mb-2"
+       placeholder="Namn"
+       @bind="newSurvivorName" />
+
+<input type="number" class="form-control mb-2"
+       placeholder="Ålder"
+       @bind="newSurvivorAge" />
+
+<select class="form-control mb-2" @bind="newSurvivorShelterId">
+    <option value="">Ingen shelter</option>
+    @foreach (var shelter in shelters)
+    {
+        <option value="@shelter.Id">@shelter.Name</option>
+    }
+</select>
+
+<button class="btn btn-success" @onclick="SaveSurvivor">
+    @(editingSurvivor == null ? "Lägg till Survivor" : "Uppdatera Survivor")
+</button>
+
+<h3 class="mt-4">Befintliga Survivors</h3>
+
+@if (!survivors.Any())
+{
+    <p>Inga survivors ännu.</p>
+}
+else
+{
+    <ul>
+        @foreach (var survivor in survivors)
+        {
+            <li>
+                <b>@survivor.Name</b> (@survivor.Age år)
+                @if (survivor.Shelter != null)
+                {
+                    <span>- Shelter: @survivor.Shelter.Name</span>
+                }
+                <button class="btn btn-primary btn-sm ms-2"
+                        @onclick="() => EditSurvivor(survivor)">
+                    Redigera
+                </button>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+
+    // Shelters
+
+    private List<Shelter> shelters = new();
+    private string newShelterName = string.Empty;
+    private string newShelterGps = string.Empty;
+
+    private Shelter? editingShelter = null;
+
+    // Supplies
+
+    private List<Supply> supplies = new();
+    private string newSupplyName = string.Empty;
+    private int newSupplyAmount = 0;
+    private SupplyType newSupplyType = SupplyType.Food;
+
+    private Supply? editingSupply = null;
+
+    // Survivors
+    private List<Survivor> survivors = new();
+    private string newSurvivorName = string.Empty;
+    private int newSurvivorAge = 0;
+    private int? newSurvivorShelterId = null;
+
+    private Survivor? editingSurvivor = null;
+
+
+    protected override void OnInitialized()
+    {
+        LoadSupplies();
+        LoadShelters();
+        LoadSurvivors();
+    }
+
+    private void LoadSupplies()
+    {
+        supplies = Data.GetAllSupplies();
+    }
+
+    private void SaveSupply()
+    {
+        if (string.IsNullOrWhiteSpace(newSupplyName))
+            return;
+
+        if (editingSupply == null)
+        {
+            // Lägg till nytt
+            Data.AddSupply(new Supply
+            {
+                Name = newSupplyName,
+                AmountInStock = newSupplyAmount,
+                Type = newSupplyType
+            });
+        }
+        else
+        {
+            // Uppdatera befintligt
+            editingSupply.Name = newSupplyName;
+            editingSupply.AmountInStock = newSupplyAmount;
+            editingSupply.Type = newSupplyType;
+
+            Data.UpdateSupply(editingSupply);
+            editingSupply = null;
+        }
+
+        // Rensa input
+        newSupplyName = string.Empty;
+        newSupplyAmount = 0;
+        newSupplyType = SupplyType.Food;
+
+        LoadSupplies();
+    }
+
+    private void EditSupply(Supply supply)
+    {
+        editingSupply = supply;
+        newSupplyName = supply.Name;
+        newSupplyAmount = supply.AmountInStock;
+        newSupplyType = supply.Type;
+    }
+
+    private void LoadShelters()
+    {
+        shelters = Data.GetAllShelters();
+    }
+
+    private void SaveShelter()
+    {
+        if (string.IsNullOrWhiteSpace(newShelterName))
+            return;
+
+        if (editingShelter == null)
+        {
+            // Lägg till nytt
+            Data.AddShelter(new Shelter
+            {
+                Name = newShelterName,
+                GpsCoordinates = newShelterGps
+            });
+        }
+        else
+        {
+            // Uppdatera befintligt
+            editingShelter.Name = newShelterName;
+            editingShelter.GpsCoordinates = newShelterGps;
+            Data.UpdateShelter(editingShelter);
+
+            editingShelter = null; // släpp edit-mode
+        }
+
+        // Rensa input
+        newShelterName = string.Empty;
+        newShelterGps = string.Empty;
+
+        LoadShelters();
+    }
+
+    private void EditShelter(Shelter shelter)
+    {
+        editingShelter = shelter;
+        newShelterName = shelter.Name;
+        newShelterGps = shelter.GpsCoordinates;
+    }
+
+    private void LoadSurvivors()
+    {
+        survivors = Data.GetAllSurvivors();
+
+        // Ladda shelters också så dropdown fungerar
+        LoadShelters();
+    }
+
+    private void SaveSurvivor()
+    {
+        if (string.IsNullOrWhiteSpace(newSurvivorName))
+            return;
+
+        if (editingSurvivor == null)
+        {
+            // Lägg till ny survivor
+            Data.AddSurvivor(new Survivor
+            {
+                Name = newSurvivorName,
+                Age = newSurvivorAge,
+                ShelterId = newSurvivorShelterId
+            });
+        }
+        else
+        {
+            // Uppdatera befintlig
+            editingSurvivor.Name = newSurvivorName;
+            editingSurvivor.Age = newSurvivorAge;
+            editingSurvivor.ShelterId = newSurvivorShelterId;
+
+            Data.UpdateSurvivor(editingSurvivor);
+            editingSurvivor = null;
+        }
+
+        // Rensa input
+        newSurvivorName = string.Empty;
+        newSurvivorAge = 0;
+        newSurvivorShelterId = null;
+
+        LoadSurvivors();
+    }
+
+    private void EditSurvivor(Survivor survivor)
+    {
+        editingSurvivor = survivor;
+        newSurvivorName = survivor.Name;
+        newSurvivorAge = survivor.Age;
+        newSurvivorShelterId = survivor.ShelterId;
+    }
+}
+
+
+
+
