@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using MyZombieProject.App.Datalayer;
 using MyZombieProject.App.Datalayer.Repositories;
+using MyZombieProject.App.Services;
+using System.Net.Http.Headers;
 
 
 namespace MyZombieProject.App
@@ -19,6 +21,15 @@ namespace MyZombieProject.App
             builder.Services.AddScoped<SurvivorRepository>();
             builder.Services.AddScoped<ShelterRepository>();
             builder.Services.AddScoped<DataFacade>();
+
+            builder.Services.AddHttpClient("openweather", client =>
+            {
+                client.BaseAddress = new Uri("https://api.openweathermap.org/");
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+            });
+
+            builder.Services.AddScoped<OpenWeatherService>();
 
             // Add services to the container.
             builder.Services.AddRazorComponents()

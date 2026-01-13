@@ -1,8 +1,10 @@
 ﻿@page "/counter"
 @using MyZombieProject.App.Datalayer
 @using MyZombieProject.App.Models
+@using MyZombieProject.App.Services
 @rendermode InteractiveServer
 @inject DataFacade Data
+@inject OpenWeatherService WeatherService
 
 
 <hr />
@@ -162,7 +164,38 @@ else
     </ul>
 }
 
+<hr />
+
+<h1>Test av WeatherService</h1>
+
+<input class="form-control mb-2"
+       placeholder="API key"
+       @bind="ApiKeyInput" />
+
+<input class="form-control mb-2"
+       placeholder="City"
+       @bind="City" />
+
+<button class="btn btn-info mb-2" @onclick="GetWeatherForecast">
+    Hämta väderprognos
+</button>
+
+<p><b>Resultat:</b> @Result</p>
+
 @code {
+
+    // WheatherForecast
+
+    private string City { get; set; } = "Gothenburg,se";
+    private string ApiKeyInput { get; set; } = string.Empty;
+    private string Result = "—";
+
+    private async Task GetWeatherForecast()
+    {
+        Result = "Calling OpenWeather...";
+        var res = await WeatherService.GetForecastAsync(City, ApiKeyInput ?? "");
+        Result = res.Message;
+    }
 
     // Shelters
 
