@@ -33,6 +33,7 @@
                 <td>@shelter.Survivors.Count</td>
                 <td>
                     <button class="retro-btn">[ VIEW ]</button>
+                    <button class="retro-btn" @onclick="() => DeleteShelter(shelter.Id)">[ REMOVE ]</button>
                 </td>
             </tr>
         }
@@ -79,6 +80,12 @@
         ShelterRepo.Add(newShelter);
         showAddModal = false;
         RefreshData();
+    }
+
+    void DeleteShelter(int id)
+    {
+        ShelterRepo.Delete(id);
+        RefreshData(); 
     }
 }
 

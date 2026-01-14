@@ -1,5 +1,10 @@
 ﻿@page "/"
 @page "/dashboard"
+@using MyZombieProject.App.Models
+@using MyZombieProject.App.Datalayer.Repositories
+@using MyZombieProject.App.Datalayer
+@inject DataFacade Facade
+@rendermode InteractiveServer
 
 <h1 class="retro-title">CLAN STATUS TERMINAL</h1>
 
@@ -10,30 +15,59 @@
 </div>
 
 <div class="retro-grid">
+    @* --- SUPPLIES BOX --- *@
     <div class="retro-box">
         <h3>SUPPLIES</h3>
         <ul>
-            <li>Food: 120 units</li>
-            <li>Ammo: 340 units</li>
-            <li>Medicine: 12 units <span class="warning">LOW</span></li>
+            <li>Food: @GetSupplyTotal(SupplyType.Food) units</li>
+            <li>Ammo: @GetSupplyTotal(SupplyType.Ammo) units</li>
+            <li>
+                Medicine: @GetSupplyTotal(SupplyType.Medicine) units
+                @if (GetSupplyTotal(SupplyType.Medicine) < 20)
+                {
+                    <span class="warning">LOW</span>
+                }
+            </li>
         </ul>
     </div>
 
+    @* --- SURVIVORS BOX --- *@
     <div class="retro-box">
         <h3>SURVIVORS</h3>
-        <p>Total: 17</p>
-        <p>Children: 3</p>
-        <p>Adults: 14</p>
+        <p>Total: @survivors.Count</p>
+        <p>Children: @survivors.Count(s => s.Age < 18)</p>
+        <p>Adults: @survivors.Count(s => s.Age >= 18)</p>
     </div>
 
+    @* --- SHELTERS BOX --- *@
     <div class="retro-box">
         <h3>SHELTERS</h3>
-        <p>Active shelters: 3</p>
-        <p>Largest: Alpha Base</p>
+        <p>Active shelters: @shelters.Count</p>
+        <p>Largest: @(shelters.OrderByDescending(s => s.Survivors.Count).FirstOrDefault()?.Name ?? "N/A")</p>
     </div>
 </div>
 
-<div class="retro-panel">
-    <p class="blink">> WARNING: MEDICINE CRITICAL</p>
-</div>
+@if (GetSupplyTotal(SupplyType.Medicine) < 20)
+{
+    <div class="retro-panel">
+        <p class="blink">> WARNING: MEDICINE CRITICAL</p>
+    </div>
+}
 
+@code {
+    private List<Supply> supplies = new();
+    private List<Survivor> survivors = new();
+    private List<Shelter> shelters = new();
+
+    protected override void OnInitialized()
+    {
+        supplies = Facade.GetAllSupplies();
+        survivors = Facade.GetAllSurvivors();
+        shelters = Facade.GetAllShelters();
+    }
+
+    private int GetSupplyTotal(SupplyType type)
+    {
+        return supplies.Where(s => s.Type == type).Sum(s => s.AmountInStock);
+    }
+}

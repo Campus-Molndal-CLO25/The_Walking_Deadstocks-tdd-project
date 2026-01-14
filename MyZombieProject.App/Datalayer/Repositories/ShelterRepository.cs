@@ -44,7 +44,9 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public List<Shelter> GetAllShelters()
         {
-            return _context.Shelters.ToList();
+            return _context.Shelters
+                .Include(s => s.Survivors) 
+                .ToList();
         }
     }
 }

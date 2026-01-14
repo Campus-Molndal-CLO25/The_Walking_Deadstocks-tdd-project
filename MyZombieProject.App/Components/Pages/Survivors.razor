@@ -3,8 +3,10 @@
 @using MyZombieProject.App.Datalayer.Repositories
 @using MyZombieProject.App.Shared
 @using MyZombieProject.App.Components.Shared
+@using MyZombieProject.App.Datalayer
 @inject SurvivorRepository SurvivorRepo
 @inject ShelterRepository ShelterRepo
+@inject DataFacade Facade
 @rendermode InteractiveServer
 
 <h1 class="retro-title">SURVIVOR DATABASE</h1>
@@ -26,7 +28,8 @@
                 <td>@person.Age</td>
                 <td>@(person.Shelter?.Name ?? "WANDERER")</td>
                 <td>
-                    <button class="retro-btn">[ EDIT ]</button>
+                    <button class="retro-btn" @onclick="() => PrepareEdit(person)">[ EDIT ]</button>
+                    <button class="retro-btn" @onclick="() => DeleteSurvivor(person.Id)">[ REMOVE ]</button>
                 </td>
             </tr>
         }
@@ -37,7 +40,7 @@
     <button class="retro-btn" @onclick="OpenModal">[ + ADD SURVIVOR ]</button>
 </div>
 
-<RetroModal IsOpen="@showAddModal" Title="REGISTER SURVIVOR" OnClose="CloseModal" OnConfirm="ConfirmAdd">
+<RetroModal IsOpen="@showAddModal" Title="REGISTER SURVIVOR" OnClose="CloseModal" OnConfirm="SaveSurvivor">
     <p>NAME:</p>
     <input type="text" class="retro-input" @bind="newSurvivor.Name" />
 
@@ -67,9 +70,9 @@
 
     private void RefreshData()
     {
-        // Vi gissar på Karins namngivning igen:
-        survivors = SurvivorRepo.GetAllSurvivors();
-        availableShelters = ShelterRepo.GetAllShelters();
+        
+        survivors = Facade.GetAllSurvivors();
+        availableShelters = Facade.GetAllShelters();
     }
 
     void OpenModal()
@@ -80,10 +83,30 @@
 
     void CloseModal() => showAddModal = false;
 
-    void ConfirmAdd()
+    void PrepareEdit(Survivor survivorToEdit)
     {
-        SurvivorRepo.Add(newSurvivor);
+        newSurvivor = survivorToEdit;
+        showAddModal = true;
+    }
+
+    void SaveSurvivor()
+    {
+        if (newSurvivor.Id == 0)
+        {
+            Facade.AddSurvivor(newSurvivor);
+        }
+        else
+        {
+            Facade.UpdateSurvivor(newSurvivor);
+        }
+
         showAddModal = false;
+        RefreshData();
+    }
+
+    void DeleteSurvivor(int id)
+    {
+        Facade.DeleteSurvivor(id);
         RefreshData();
     }
 }
