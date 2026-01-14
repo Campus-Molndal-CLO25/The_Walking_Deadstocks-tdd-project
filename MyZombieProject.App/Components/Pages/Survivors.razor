@@ -70,7 +70,7 @@
 
     private void RefreshData()
     {
-        
+
         survivors = Facade.GetAllSurvivors();
         availableShelters = Facade.GetAllShelters();
     }
@@ -85,7 +85,13 @@
 
     void PrepareEdit(Survivor survivorToEdit)
     {
-        newSurvivor = survivorToEdit;
+        newSurvivor = new Survivor
+        {
+			Id = survivorToEdit.Id,
+			Name = survivorToEdit.Name,
+			Age = survivorToEdit.Age,
+			ShelterId = survivorToEdit.ShelterId
+        };
         showAddModal = true;
     }
 

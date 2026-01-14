@@ -11,6 +11,7 @@ namespace MyZombieProject.App.Datalayer
 
         public DbSet<Survivor> Survivors => Set<Survivor>();
 
+
         public MyZombieDataContext(DbContextOptions<MyZombieDataContext> options)
             : base(options)
         {

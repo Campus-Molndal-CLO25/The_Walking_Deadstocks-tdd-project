@@ -27,7 +27,7 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public void Update(Survivor survivor)
         {
-            _context.Survivors.Update(survivor);
+            _context.Entry(survivor).State = EntityState.Modified;
             _context.SaveChanges();
         }
 
@@ -41,7 +41,10 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public List<Survivor> GetAllSurvivors()
         {
-            return _context.Survivors.ToList();
+            return _context.Survivors
+                .Include(s => s.Shelter) 
+                .AsNoTracking()
+                .ToList();
         }
     }
 }
