@@ -3,7 +3,9 @@
 @using MyZombieProject.App.Datalayer.Repositories
 @using MyZombieProject.App.Shared
 @using MyZombieProject.App.Components.Shared
-@inject ShelterRepository ShelterRepo
+@using MyZombieProject.App.Datalayer
+@inject NavigationManager Nav
+@inject DataFacade Facade
 @rendermode InteractiveServer
 
 <h1 class="retro-title">SHELTER REGISTRY</h1>
@@ -31,31 +33,38 @@
                 <td>@shelter.GpsCoordinates</td>
                 <td>--</td> @* Eftersom Capacity saknas i modellen än så länge *@
                 <td>@shelter.Survivors.Count</td>
-                <td>
-                    <button class="retro-btn">[ VIEW ]</button>
+                
+                <td class="actions-cell">
+                    <button class="retro-btn" @onclick="() => ViewShelter(shelter.Id)">[ VIEW ]</button>
+                    <button class="retro-btn" @onclick="() => PrepareEdit(shelter)">[ EDIT ]</button>
                     <button class="retro-btn" @onclick="() => DeleteShelter(shelter.Id)">[ REMOVE ]</button>
                 </td>
+                
             </tr>
         }
     </tbody>
 </table>
 
 <div class="retro-panel">
-    <button class="retro-btn" @onclick="OpenModal">[ + ADD SHELTER ]</button>
+    <button class="retro-btn" @onclick="OpenAddModal">[ + ADD SHELTER ]</button>
 </div>
 
-<RetroModal IsOpen="@showAddModal" Title="ADD SHELTER" OnClose="CloseModal" OnConfirm="ConfirmAdd">
-    <p>SHELTER NAME:</p>
-    <input type="text" class="retro-input" @bind="newShelter.Name" />
+<RetroModal IsOpen="@showModal"
+            Title="@(editingShelter.Id == 0 ? "ADD NEW SHELTER" : "EDIT SHELTER")"
+            OnClose="CloseModal"
+            OnConfirm="SaveShelter">
 
-    <p>GPS COORDINATES:</p>
-    <input type="text" class="retro-input" @bind="newShelter.GpsCoordinates" placeholder="e.g. 58.39, 13.86" />
+    <p>SHELTER NAME:</p>
+    <input type="text" class="retro-input" @bind="editingShelter.Name" />
+
+    <p>LOCATION (GPS):</p>
+    <input type="text" class="retro-input" @bind="editingShelter.GpsCoordinates" />
 </RetroModal>
 
 @code {
     private List<Shelter> shelters = new();
-    private bool showAddModal = false;
-    private Shelter newShelter = new Shelter();
+    private bool showModal = false;
+    private Shelter editingShelter = new Shelter();
 
     protected override void OnInitialized()
     {
@@ -64,28 +73,44 @@
 
     private void RefreshData()
     {
-        shelters = ShelterRepo.GetAllShelters();
+        shelters = Facade.GetAllShelters();
     }
 
-    void OpenModal()
+    void OpenAddModal()
     {
-        newShelter = new Shelter();
-        showAddModal = true;
+        editingShelter = new Shelter(); // Nollställ för ny skapelse
+        showModal = true;
     }
 
-    void CloseModal() => showAddModal = false;
-
-    void ConfirmAdd()
+    void PrepareEdit(Shelter shelter)
     {
-        ShelterRepo.Add(newShelter);
-        showAddModal = false;
+        editingShelter = shelter; // Ladda in befintlig data
+        showModal = true;
+    }
+
+    void CloseModal() => showModal = false;
+
+    void SaveShelter()
+    {
+        if (editingShelter.Id == 0)
+        {
+            Facade.AddShelter(editingShelter);
+        }
+        else
+        {
+            Facade.UpdateShelter(editingShelter);
+        }
+
+        showModal = false;
         RefreshData();
     }
 
     void DeleteShelter(int id)
     {
-        ShelterRepo.Delete(id);
-        RefreshData(); 
+        Facade.DeleteShelter(id);
+        RefreshData();
     }
+
+    void ViewShelter(int id) => Nav.NavigateTo($"/shelter-details/{id}");
 }
 

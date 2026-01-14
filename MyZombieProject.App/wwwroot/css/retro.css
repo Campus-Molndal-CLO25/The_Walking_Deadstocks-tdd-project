@@ -194,6 +194,16 @@ input, select, button {
         color: black;
     }
 
+.actions-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+    .actions-cell .retro-btn {
+        margin: 0 5px;
+        display: inline-block;
+    }
+
 @keyframes blink {
     to {
         visibility: hidden;
