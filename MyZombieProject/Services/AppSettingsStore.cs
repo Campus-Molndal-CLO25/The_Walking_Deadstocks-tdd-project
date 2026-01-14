@@ -4,14 +4,12 @@ namespace MyZombieProject.Services;
 
 public sealed class AppSettingsStore
 {
-    private const string Company = "CampusMolndal";
     private const string AppName = "MyZombieProject";
     private const string FileName = "settings.json";
 
     private string SettingsPath =>
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            Company,
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             AppName,
             FileName);
 
@@ -40,6 +38,5 @@ public sealed class AppSettingsStore
 
 public sealed class AppSettings
 {
-    // Placeholder – sparas lokalt, committas aldrig
     public string? OpenWeatherApiKey { get; set; }
 }
