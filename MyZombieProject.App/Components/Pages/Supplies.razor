@@ -4,6 +4,7 @@
 @using MyZombieProject.App.Datalayer.Repositories
 @using MyZombieProject.App.Models
 @inject SupplyRepository SupplyRepo
+@inject ShelterRepository ShelterRepo
 @rendermode InteractiveServer
 
 <h1 class="retro-title">SUPPLY MANAGEMENT</h1>
@@ -60,6 +61,15 @@
 
     <p>AMOUNT:</p>
     <input type="number" class="retro-input" @bind="newSupply.AmountInStock" />
+
+    <p>LOCATION (SHELTER):</p>
+    <select class="retro-input" @bind="newSupply.ShelterId">
+        <option value="">-- Choose Storage Location --</option>
+        @foreach (var s in allShelters)
+        {
+            <option value="@s.Id">@s.Name</option>
+        }
+    </select>
 </RetroModal>
 
 <RetroModal IsOpen="@showDetailsModal" Title="INVENTORY DETAILS" OnClose="() => showDetailsModal = false" OnConfirm="() => showDetailsModal = false">
@@ -69,14 +79,13 @@
         @foreach (var item in detailedItems)
         {
             <li class="supply-item">
-                <span class="item-info">@item.Name: @item.AmountInStock st</span>
-
+                <span class="item-info">
+                    @item.Name: **@item.AmountInStock st** <br />
+                    <small>Location: @(allShelters.FirstOrDefault(s => s.Id == item.ShelterId)?.Name ?? "In Transit")</small>
+                </span>
                 <div class="item-actions">
-                    @* Befintliga knappar *@
                     <button class="retro-btn" @onclick="() => ChangeAmount(item, 1)">[ + ]</button>
                     <button class="retro-btn" @onclick="() => ChangeAmount(item, -1)">[ - ]</button>
-
-                    @* NYA KNAPPAR *@
                     <button class="retro-btn btn-edit" @onclick="() => PrepareEdit(item)">[ EDIT ]</button>
                     <button class="retro-btn btn-delete" @onclick="() => DeleteItem(item)">[ X ]</button>
                 </div>
@@ -89,6 +98,7 @@
     bool showAddModal = false;
     bool showDetailsModal = false; // NY: Håller koll på detaljvyn
 
+    private List<Shelter> allShelters = new();
     private List<Supply> supplies = new();
     private Supply newSupply = new Supply();
 
@@ -98,21 +108,19 @@
 
     protected override void OnInitialized()
     {
+        allShelters = ShelterRepo.GetAllShelters();
         RefreshData();
     }
 
     private void RefreshData()
     {
-        // 1. Hämta ALLA prylar från databasen
-        var allSupplies = SupplyRepo.GetAllSupplies();
+        var allRawData = SupplyRepo.GetAllSupplies();
 
-        // 2. Gruppera dem per Type och skapa en "sammanfattnings-lista"
-        supplies = allSupplies
+        supplies = allRawData
             .GroupBy(s => s.Type)
             .Select(group => new Supply
             {
                 Type = group.Key,
-                // Här plussar vi ihop antalet från alla prylar i kategorin!
                 AmountInStock = group.Sum(s => s.AmountInStock)
             })
             .ToList();
@@ -144,13 +152,6 @@
         showDetailsModal = false; // Stäng båda för säkerhets skull
     }
 
-    void ConfirmAdd()
-    {
-        SupplyRepo.Add(newSupply);
-        showAddModal = false;
-        RefreshData();
-    }
-
     void ChangeAmount(Supply item, int change)
     {
         item.AmountInStock += change;
@@ -169,10 +170,48 @@
 
     void PrepareEdit(Supply item)
     {
-        // Här kan du antingen öppna en ny liten modal för att ändra namn,
-        // eller helt enkelt använda din "Add Supply"-modal men ladda in 'item' i den!
-        newSupply = item;
+        showDetailsModal = false;
+        // Vi skapar en kopia för att inte störa databasens tracking
+        newSupply = new Supply
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Type = item.Type,
+            AmountInStock = item.AmountInStock,
+            ShelterId = item.ShelterId
+        };
         showAddModal = true;
+    }
+
+    void ConfirmAdd()
+    {
+        try
+        {
+            if (newSupply.Id == 0)
+            {
+                SupplyRepo.Add(newSupply);
+            }
+            else
+            {
+                SupplyRepo.Update(newSupply);
+            }
+
+            showAddModal = false;
+            RefreshData();
+
+            if (selectedType.HasValue)
+            {
+                OpenInventory(selectedType.Value);
+            }
+
+            // Rensa objektet så det inte ligger kvar gammal data till nästa gång
+            newSupply = new Supply();
+        }
+        catch (Exception ex)
+        {
+            // Här kan du skriva ut felet i konsolen om det mot förmodan dyker upp igen
+            Console.WriteLine(ex.Message);
+        }
     }
 }
 

@@ -13,5 +13,7 @@ namespace MyZombieProject.App.Models
         public string Name { get; set; } = string.Empty;
 
         public SupplyType Type { get; set; }
+
+        public int? ShelterId { get; set; }
     }
 }

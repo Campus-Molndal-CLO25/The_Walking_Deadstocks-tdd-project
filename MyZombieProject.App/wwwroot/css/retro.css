@@ -235,6 +235,9 @@ input, select, button {
     font-family: 'Courier New', Courier, monospace; /* För den extra retro-känslan */
 }
 
+/* Se till att Edit-modalen alltid vinner */
+
+
 @keyframes blink {
     to {
         visibility: hidden;

@@ -26,7 +26,20 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public void Update(Supply supply)
         {
-            _context.Supplies.Update(supply);
+            // 1. Hitta om det redan finns en instans av detta objekt i minnet
+            var local = _context.Supplies
+                .Local
+                .FirstOrDefault(entry => entry.Id == supply.Id);
+
+            // 2. Om den finns, säg åt EF att sluta bevaka den (Detach)
+            if (local != null)
+            {
+                _context.Entry(local).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+            }
+
+            // 3. Nu kan vi säkert be EF att börja bevaka vårt NYA objekt och sätta det som ändrat
+            _context.Entry(supply).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
             _context.SaveChanges();
         }
 

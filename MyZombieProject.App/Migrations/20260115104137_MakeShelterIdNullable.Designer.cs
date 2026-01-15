@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyZombieProject.App.Datalayer;
 
@@ -10,9 +11,11 @@ using MyZombieProject.App.Datalayer;
 namespace MyZombieProject.App.Migrations
 {
     [DbContext(typeof(MyZombieDataContext))]
-    partial class MyZombieDataContextModelSnapshot : ModelSnapshot
+    [Migration("20260115104137_MakeShelterIdNullable")]
+    partial class MakeShelterIdNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
