@@ -3,7 +3,20 @@ using MyZombieProject.App.Models;
 
 namespace MyZombieProject.App.Datalayer.Repositories
 {
-    public class SurvivorRepository
+    public interface ISurvivorRepository
+    {
+        int Add(Survivor survivor);
+
+        Survivor GetById(int id);
+
+        void Update(Survivor survivor);
+
+        void Delete(int id);
+
+        List<Survivor> GetAllSurvivors();
+    }
+
+    public class SurvivorRepository : ISurvivorRepository
     {
         private readonly MyZombieDataContext _context;
 

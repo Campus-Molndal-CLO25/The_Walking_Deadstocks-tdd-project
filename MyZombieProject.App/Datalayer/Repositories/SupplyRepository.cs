@@ -2,7 +2,20 @@
 
 namespace MyZombieProject.App.Datalayer.Repositories
 {
-    public class SupplyRepository
+    public interface ISupplyRepository
+    {
+        int Add(Supply supply);
+
+        Supply GetById(int id);
+
+        void Update(Supply supply);
+
+        void Delete(int id);
+
+        List<Supply> GetAllSupplies();
+    }
+
+    public class SupplyRepository : ISupplyRepository
     {
         private readonly MyZombieDataContext _context;
 
