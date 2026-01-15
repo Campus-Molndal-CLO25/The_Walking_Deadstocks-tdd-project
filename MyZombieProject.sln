@@ -25,6 +25,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprint_Planning", "Sprint_Planning", "{DCCC8590-42BF-484D-8D4C-08789565D2A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Daily_Standups", "Daily_Standups", "{EC47BAAE-063D-47B7-86FF-1929CFAFAB1E}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2025-01-06.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2025-01-06.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-05.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-05.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-09.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-09.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-10.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-10.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-13.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-13.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-14.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-14.md
+		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-15.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-15.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Retrospectives", "Retrospectives", "{0ED572E4-ECA6-4FFC-A7AD-0D081ACAA1C7}"
 EndProject

@@ -30,7 +30,14 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public void Update(Shelter shelter)
         {
-            _context.Entry(shelter).State = EntityState.Modified;
+            var local = _context.Shelters.Local.FirstOrDefault(entry => entry.Id == shelter.Id);
+
+            if (local != null)
+            {
+                _context.Entry(local).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+            }
+
+            _context.Entry(shelter).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             _context.SaveChanges();
         }
 

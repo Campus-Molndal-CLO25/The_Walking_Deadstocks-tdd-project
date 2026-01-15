@@ -31,7 +31,13 @@
             <tr>
                 <td>@shelter.Name</td>
                 <td>@shelter.GpsCoordinates</td>
-                <td>--</td> @* Eftersom Capacity saknas i modellen än så länge *@
+                <td>
+                    @shelter.Survivors.Count / @shelter.Capacity
+                    @if (shelter.Survivors.Count >= shelter.Capacity)
+                    {
+                        <span style="color: red; font-weight: bold; margin-left: 5px;">[ FULL ]</span>
+                    }
+                </td>
                 <td>@shelter.Survivors.Count</td>
                 
                 <td class="actions-cell">
@@ -59,6 +65,9 @@
 
     <p>LOCATION (GPS):</p>
     <input type="text" class="retro-input" @bind="editingShelter.GpsCoordinates" />
+
+    <p>MAX CAPACITY:</p>
+    <input type="number" class="retro-input" @bind="editingShelter.Capacity" />
 </RetroModal>
 
 @code {

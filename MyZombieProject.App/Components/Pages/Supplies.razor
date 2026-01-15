@@ -33,8 +33,7 @@
                 <td>@item.AmountInStock</td>
                 <td>@(item.AmountInStock < 20 ? "LOW" : "OK")</td>
                 <td>
-                    <button class="retro-btn" @onclick="() => ChangeAmount(item, 1)">[ + ADD ]</button>
-                    <button class="retro-btn" @onclick="() => ChangeAmount(item, -1)">[ - USE ]</button>
+                    <button class="retro-btn" @onclick="() => OpenInventory(item.Type)">[ VIEW DETAILS ]</button>
                 </td>
             </tr>
         }
@@ -63,14 +62,39 @@
     <input type="number" class="retro-input" @bind="newSupply.AmountInStock" />
 </RetroModal>
 
+<RetroModal IsOpen="@showDetailsModal" Title="INVENTORY DETAILS" OnClose="() => showDetailsModal = false" OnConfirm="() => showDetailsModal = false">
+    <h3>Detailed list for: @selectedType</h3>
+    <hr />
+    <ul class="retro-list">
+        @foreach (var item in detailedItems)
+        {
+            <li class="supply-item">
+                <span class="item-info">@item.Name: @item.AmountInStock st</span>
 
+                <div class="item-actions">
+                    @* Befintliga knappar *@
+                    <button class="retro-btn" @onclick="() => ChangeAmount(item, 1)">[ + ]</button>
+                    <button class="retro-btn" @onclick="() => ChangeAmount(item, -1)">[ - ]</button>
+
+                    @* NYA KNAPPAR *@
+                    <button class="retro-btn btn-edit" @onclick="() => PrepareEdit(item)">[ EDIT ]</button>
+                    <button class="retro-btn btn-delete" @onclick="() => DeleteItem(item)">[ X ]</button>
+                </div>
+            </li>
+        }
+    </ul>
+</RetroModal>
 
 @code {
     bool showAddModal = false;
-    private List<Supply> supplies = new();
+    bool showDetailsModal = false; // NY: Håller koll på detaljvyn
 
-   
+    private List<Supply> supplies = new();
     private Supply newSupply = new Supply();
+
+    // NYA: För att lagra vad vi valt att titta på
+    private SupplyType? selectedType;
+    private List<Supply> detailedItems = new();
 
     protected override void OnInitialized()
     {
@@ -79,37 +103,76 @@
 
     private void RefreshData()
     {
-        supplies = SupplyRepo.GetAllSupplies();
+        // 1. Hämta ALLA prylar från databasen
+        var allSupplies = SupplyRepo.GetAllSupplies();
+
+        // 2. Gruppera dem per Type och skapa en "sammanfattnings-lista"
+        supplies = allSupplies
+            .GroupBy(s => s.Type)
+            .Select(group => new Supply
+            {
+                Type = group.Key,
+                // Här plussar vi ihop antalet från alla prylar i kategorin!
+                AmountInStock = group.Sum(s => s.AmountInStock)
+            })
+            .ToList();
+    }
+
+    // NY METOD: Denna körs när du klickar på [ VIEW DETAILS ]
+    void OpenInventory(SupplyType type)
+    {
+        selectedType = type;
+
+        // Hämta ALLA föremål igen för att vara säker på att vi får de enskilda raderna
+        var allRawData = SupplyRepo.GetAllSupplies();
+
+        // Filtrera fram bara de som matchar typen (t.ex. Food)
+        detailedItems = allRawData.Where(s => s.Type == type).ToList();
+
+        showDetailsModal = true;
     }
 
     void OpenModal()
     {
-        newSupply = new Supply(); // Nollställ formuläret
+        newSupply = new Supply();
         showAddModal = true;
     }
 
-    void CloseModal() => showAddModal = false;
+    void CloseModal()
+    {
+        showAddModal = false;
+        showDetailsModal = false; // Stäng båda för säkerhets skull
+    }
 
     void ConfirmAdd()
     {
-       
         SupplyRepo.Add(newSupply);
-
         showAddModal = false;
-
         RefreshData();
     }
 
     void ChangeAmount(Supply item, int change)
     {
         item.AmountInStock += change;
-
         if (item.AmountInStock < 0) item.AmountInStock = 0;
-
         SupplyRepo.Update(item);
-
         StateHasChanged();
     }
-}
 
+    void DeleteItem(Supply item)
+    {
+        SupplyRepo.Delete(item.Id); // Se till att ditt repo har en Delete-metod som tar ID
+        detailedItems.Remove(item); // Ta bort den från den öppna listan direkt
+        RefreshData();              // Uppdatera huvudtabellen i bakgrunden
+        StateHasChanged();
+    }
+
+    void PrepareEdit(Supply item)
+    {
+        // Här kan du antingen öppna en ny liten modal för att ändra namn,
+        // eller helt enkelt använda din "Add Supply"-modal men ladda in 'item' i den!
+        newSupply = item;
+        showAddModal = true;
+    }
+}
 
