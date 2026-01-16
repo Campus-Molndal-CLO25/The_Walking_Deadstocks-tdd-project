@@ -29,10 +29,19 @@
     <tbody>
         @foreach (var item in supplies)
         {
-            <tr class="@(item.AmountInStock < 20 ? "critical" : "")">
+            <tr class="@(item.AmountInStock < 20 ? "warning" : "")">
                 <td>@item.Type</td> 
                 <td>@item.AmountInStock</td>
-                <td>@(item.AmountInStock < 20 ? "LOW" : "OK")</td>
+                <td>
+                    @if (item.AmountInStock < 20)
+                    {
+                        <span class="warning">LOW STOCK</span>
+                    }
+                    else
+                    {
+                        <span>OK</span>
+                    }
+                </td>
                 <td>
                     <button class="retro-btn" @onclick="() => OpenInventory(item.Type)">[ VIEW DETAILS ]</button>
                 </td>
@@ -41,9 +50,15 @@
     </tbody>
 </table>
 
-<div class="retro-panel">
-    <p class="blink">> WARNING: MEDICINE SUPPLY CRITICAL</p>
-</div>
+@if (CriticalSupplies.Any())
+{
+    <div class="retro-panel">
+        @foreach (var critical in CriticalSupplies)
+        {
+            <p class="warning">> ALERT: @critical.Type.ToString().ToUpper() LEVEL CRITICAL (@critical.AmountInStock LEFT)</p>
+        }
+    </div>
+}
 
 
 <RetroModal IsOpen="@showAddModal" Title="ADD SUPPLY" OnClose="CloseModal" OnConfirm="ConfirmAdd">
@@ -95,6 +110,8 @@
 </RetroModal>
 
 @code {
+    private List<Supply> CriticalSupplies => supplies.Where(s => s.AmountInStock < 20).ToList();
+
     bool showAddModal = false;
     bool showDetailsModal = false; 
 

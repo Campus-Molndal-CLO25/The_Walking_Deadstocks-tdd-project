@@ -1,15 +1,19 @@
 ﻿@using MyZombieProject.App
-@using MyZombieProject.App.Shared 
+@using MyZombieProject.App.Shared
+@* Se till att detta namespace matchar mappen där RetroLayout ligger *@
+@rendermode InteractiveServer
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData"
-                   DefaultLayout="@typeof(RetroLayout)" />
+        @* <ApiKeyGate> *@ 
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(RetroLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        @* </ApiKeyGate> *@ 
     </Found>
-
     <NotFound>
+        @* Använd samma Layout här som ovan *@
         <LayoutView Layout="@typeof(RetroLayout)">
-            <p>ERROR 404: FILE NOT FOUND</p>
+            <p role="alert">TERMINAL ERROR: ADDRESS NOT FOUND.</p>
         </LayoutView>
     </NotFound>
 </Router>

@@ -1,0 +1,45 @@
+﻿﻿@using MyZombieProject.Services
+@inject AppSettingsStore SettingsStore
+@inject ApiKeyState KeyState
+
+@if (!_loaded)
+{
+    <p>Loading settings...</p>
+}
+else if (!KeyState.HasKey)
+{
+    <div style="max-width:520px; padding:12px; border:1px solid #ccc;">
+        <h3>API key missing</h3>
+        <p>
+            Ingen OpenWeather API-nyckel hittades.
+            Lägg in den manuellt i filen:
+        </p>
+
+        <pre>%AppData%\CampusMolndal\MyZombieProject\settings.json</pre>
+
+        <p>Starta om appen efter att du lagt in nyckeln.</p>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _loaded;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = await SettingsStore.LoadAsync();
+
+        // 🔥 HÄR SÄTTS NYCKELN AUTOMATISKT
+        if (!string.IsNullOrWhiteSpace(settings.OpenWeatherApiKey))
+        {
+            KeyState.Set(settings.OpenWeatherApiKey);
+        }
+
+        _loaded = true;
+    }
+}

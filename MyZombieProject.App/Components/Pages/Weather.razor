@@ -1,0 +1,41 @@
+﻿@page "/weather"
+@using MyZombieProject.Services
+@inject OpenWeatherService WeatherService
+@inject ApiKeyState KeyState
+
+<h1>Weather</h1>
+
+<p>
+    Skriv stad i URL (ingen knapp behövs):
+    <code>/weather?city=Gothenburg,se</code>
+</p>
+
+<p><b>City:</b> @City</p>
+<p><b>Status:</b> @Status</p>
+<p><b>Result:</b> @Result</p>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? city { get; set; }
+
+    private string City => string.IsNullOrWhiteSpace(city) ? "Gothenburg,se" : city!;
+    private string Status = "Loading...";
+    private string Result = "—";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var key = KeyState.OpenWeatherApiKey ?? "";
+            var res = await WeatherService.GetForecastAsync(City, key);
+
+            Status = res.Success ? "OK" : "Failed";
+            Result = res.Message;
+        }
+        catch (Exception ex)
+        {
+            Status = "Crash";
+            Result = ex.ToString();
+        }
+    }
+}

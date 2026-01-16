@@ -18,16 +18,18 @@
     @* --- SUPPLIES BOX --- *@
     <div class="retro-box">
         <h3>SUPPLIES</h3>
-        <ul>
-            <li>Food: @GetSupplyTotal(SupplyType.Food) units</li>
-            <li>Ammo: @GetSupplyTotal(SupplyType.Ammo) units</li>
-            <li>
-                Medicine: @GetSupplyTotal(SupplyType.Medicine) units
-                @if (GetSupplyTotal(SupplyType.Medicine) < 20)
-                {
-                    <span class="warning">LOW</span>
-                }
-            </li>
+        <ul class="retro-list">
+            @foreach (SupplyType type in Enum.GetValues(typeof(SupplyType)))
+            {
+                var total = GetSupplyTotal(type);
+                <li>
+                    @type: @total units
+                    @if (total < 20)
+                    {
+                        <span class="warning"> [!] LOW STOCK</span>
+                    }
+                </li>
+            }
         </ul>
     </div>
 
@@ -47,12 +49,12 @@
     </div>
 </div>
 
-@if (GetSupplyTotal(SupplyType.Medicine) < 20)
+@* @if (GetSupplyTotal(SupplyType.Medicine) < 20)
 {
     <div class="retro-panel">
         <p class="blink">> WARNING: MEDICINE CRITICAL</p>
     </div>
-}
+} *@
 
 @code {
     private List<Supply> supplies = new();
