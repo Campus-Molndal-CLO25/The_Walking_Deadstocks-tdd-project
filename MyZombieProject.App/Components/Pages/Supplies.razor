@@ -96,13 +96,13 @@
 
 @code {
     bool showAddModal = false;
-    bool showDetailsModal = false; // NY: Håller koll på detaljvyn
+    bool showDetailsModal = false; 
 
     private List<Shelter> allShelters = new();
     private List<Supply> supplies = new();
     private Supply newSupply = new Supply();
 
-    // NYA: För att lagra vad vi valt att titta på
+    
     private SupplyType? selectedType;
     private List<Supply> detailedItems = new();
 
@@ -126,15 +126,12 @@
             .ToList();
     }
 
-    // NY METOD: Denna körs när du klickar på [ VIEW DETAILS ]
     void OpenInventory(SupplyType type)
     {
         selectedType = type;
 
-        // Hämta ALLA föremål igen för att vara säker på att vi får de enskilda raderna
         var allRawData = SupplyRepo.GetAllSupplies();
 
-        // Filtrera fram bara de som matchar typen (t.ex. Food)
         detailedItems = allRawData.Where(s => s.Type == type).ToList();
 
         showDetailsModal = true;
@@ -149,7 +146,7 @@
     void CloseModal()
     {
         showAddModal = false;
-        showDetailsModal = false; // Stäng båda för säkerhets skull
+        showDetailsModal = false;
     }
 
     void ChangeAmount(Supply item, int change)
@@ -162,16 +159,16 @@
 
     void DeleteItem(Supply item)
     {
-        SupplyRepo.Delete(item.Id); // Se till att ditt repo har en Delete-metod som tar ID
-        detailedItems.Remove(item); // Ta bort den från den öppna listan direkt
-        RefreshData();              // Uppdatera huvudtabellen i bakgrunden
+        SupplyRepo.Delete(item.Id); 
+        detailedItems.Remove(item); 
+        RefreshData();              
         StateHasChanged();
     }
 
     void PrepareEdit(Supply item)
     {
         showDetailsModal = false;
-        // Vi skapar en kopia för att inte störa databasens tracking
+        
         newSupply = new Supply
         {
             Id = item.Id,
