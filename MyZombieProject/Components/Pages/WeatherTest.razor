@@ -1,0 +1,90 @@
+﻿@page "/weather-test"
+@rendermode InteractiveServer
+
+@inject MyZombieProject.Services.OpenWeatherService Weather
+@inject MyZombieProject.Services.AppSettingsStore SettingsStore
+
+<h3>OpenWeather test</h3>
+
+<div style="max-width: 520px; display: grid; gap: 12px;">
+    <label>
+        City (ex: Gothenburg,se)
+        <input style="width: 100%;" @bind="City" />
+    </label>
+
+    <fieldset style="padding: 10px;">
+        <legend>Option A: API key (session)</legend>
+
+        <input style="width: 100%;" placeholder="Paste API key here"
+               @bind="ApiKeyInput" />
+
+        <button @onclick="TestWithSessionKey">Test (session key)</button>
+    </fieldset>
+
+    <fieldset style="padding: 10px;">
+        <legend>Option B: API key (config file)</legend>
+
+        <button @onclick="LoadFromConfig">Load from config</button>
+        <button @onclick="SaveToConfig"
+                disabled="@string.IsNullOrWhiteSpace(ApiKeyInput)">
+            Save current key
+        </button>
+
+        <div style="font-size: 0.9em; opacity: 0.8;">
+            Status: @ConfigKeyStatus
+        </div>
+
+        <button @onclick="TestWithConfigKey"
+                disabled="@string.IsNullOrWhiteSpace(ConfigApiKey)">
+            Test (config key)
+        </button>
+    </fieldset>
+
+    <div style="padding:10px; border:1px solid #ccc;">
+        <b>Result:</b>
+        <div>@Result</div>
+    </div>
+</div>
+
+@code {
+    private string City { get; set; } = "Gothenburg,se";
+    private string ApiKeyInput { get; set; } = "";
+
+    private string? ConfigApiKey;
+    private string ConfigKeyStatus = "Not loaded";
+    private string Result = "—";
+
+    private async Task TestWithSessionKey()
+    {
+        Result = "Calling OpenWeather...";
+        var res = await Weather.GetForecastAsync(City, ApiKeyInput);
+        Result = res.Message;
+    }
+
+    private async Task LoadFromConfig()
+    {
+        var settings = await SettingsStore.LoadAsync();
+        ConfigApiKey = settings.OpenWeatherApiKey;
+
+        ConfigKeyStatus = string.IsNullOrWhiteSpace(ConfigApiKey)
+            ? "No key found"
+            : "Key loaded (hidden)";
+    }
+
+    private async Task SaveToConfig()
+    {
+        var settings = await SettingsStore.LoadAsync();
+        settings.OpenWeatherApiKey = ApiKeyInput;
+        await SettingsStore.SaveAsync(settings);
+
+        ConfigApiKey = ApiKeyInput;
+        ConfigKeyStatus = "Saved";
+    }
+
+    private async Task TestWithConfigKey()
+    {
+        Result = "Calling OpenWeather...";
+        var res = await Weather.GetForecastAsync(City, ConfigApiKey ?? "");
+        Result = res.Message;
+    }
+}

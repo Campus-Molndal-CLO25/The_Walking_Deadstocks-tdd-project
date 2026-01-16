@@ -1,0 +1,32 @@
+﻿<ErrorBoundary @ref="_boundary" OnError="OnError">
+    @ChildContent
+</ErrorBoundary>
+
+@if (_error != null)
+{
+    <div style="margin:12px; padding:12px; border:1px solid #c00;">
+        <h3>Blazor error</h3>
+        <pre style="white-space:pre-wrap;">@_error</pre>
+        <button type="button" @onclick="Recover">Recover</button>
+    </div>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private ErrorBoundary? _boundary;
+    private string? _error;
+
+    private Task OnError(Exception ex)
+    {
+        _error = ex.ToString();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void Recover()
+    {
+        _error = null;
+        _boundary?.Recover();
+    }
+}

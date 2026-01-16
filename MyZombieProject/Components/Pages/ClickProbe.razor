@@ -1,0 +1,13 @@
+﻿@page "/click-probe"
+@rendermode InteractiveServer
+
+<h3>Click Probe</h3>
+
+<p>Count: @_count</p>
+
+<button type="button" @onclick="Inc">Click me</button>
+
+@code {
+    private int _count = 0;
+    private void Inc() => _count++;
+}
