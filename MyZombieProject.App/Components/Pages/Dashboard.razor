@@ -8,53 +8,64 @@
 
 <h1 class="retro-title">CLAN STATUS TERMINAL</h1>
 
-<div class="retro-panel">
-    <p>> SYSTEM ONLINE</p>
-    <p>> DATE: @DateTime.Now.ToString("yyyy-MM-dd")</p>
-    <p>> TIME: @DateTime.Now.ToString("HH:mm:ss")</p>
+<div class="retro-panel main-header">
+    <div class="header-line">> SYSTEM STATUS: <span class="status-online">ONLINE</span></div>
+    <div class="header-line">> DATE: @DateTime.Now.ToString("yyyy-MM-dd") | TIME: @DateTime.Now.ToString("HH:mm:ss")</div>
+    <div class="header-line">> LOCATION: GOTHENBURG SECTOR-7</div>
 </div>
 
-<div class="retro-grid">
-    @* --- SUPPLIES BOX --- *@
+<div class="dashboard-grid">
+    @* --- RESOURCE MONITOR --- *@
     <div class="retro-box">
-        <h3>SUPPLIES</h3>
-        <ul class="retro-list">
+        <div class="box-header">[ RESOURCE MONITOR ]</div>
+        <div class="box-content">
             @foreach (SupplyType type in Enum.GetValues(typeof(SupplyType)))
             {
                 var total = GetSupplyTotal(type);
-                <li>
-                    @type: @total units
-                    @if (total < 20)
-                    {
-                        <span class="warning"> [!] LOW STOCK</span>
-                    }
-                </li>
+                <div class="resource-line">
+                    <span class="res-name">@type:</span>
+                    <span class="res-value">@total.ToString("D3")</span>
+                    <span class="res-status @(total < 20 ? "crit" : "stable")">
+                        @(total < 20 ? "[ CRITICAL ]" : "[ STABLE ]")
+                    </span>
+                </div>
             }
-        </ul>
+        </div>
     </div>
 
-    @* --- SURVIVORS BOX --- *@
+    @* --- BIOMETRIC DATA --- *@
     <div class="retro-box">
-        <h3>SURVIVORS</h3>
-        <p>Total: @survivors.Count</p>
-        <p>Children: @survivors.Count(s => s.Age < 18)</p>
-        <p>Adults: @survivors.Count(s => s.Age >= 18)</p>
+        <div class="box-header">[ BIOMETRIC DATA ]</div>
+        <div class="box-content centered">
+            <div class="big-population-number">@survivors.Count</div>
+            <div class="sub-text">TOTAL SURVIVORS</div>
+            <div class="age-split">
+                ADULTS: @survivors.Count(s => s.Age >= 18) | YOUTH: @survivors.Count(s => s.Age < 18)
+            </div>
+        </div>
     </div>
 
-    @* --- SHELTERS BOX --- *@
+    @* --- FACILITY OVERVIEW --- *@
     <div class="retro-box">
-        <h3>SHELTERS</h3>
-        <p>Active shelters: @shelters.Count</p>
-        <p>Largest: @(shelters.OrderByDescending(s => s.Survivors.Count).FirstOrDefault()?.Name ?? "N/A")</p>
+        <div class="box-header">[ FACILITY OVERVIEW ]</div>
+        <div class="box-content">
+            <div class="info-row"><span>SHELTERS:</span> <span class="highlight">@shelters.Count</span></div>
+            <div class="info-row"><span>CAPACITY:</span> <span class="highlight">@((survivors.Count * 1.2).ToString("F0"))%</span></div>
+            <div class="info-row"><span>PRIMARY:</span> <span class="highlight">@(shelters.OrderByDescending(s => s.Survivors.Count).FirstOrDefault()?.Name?.ToUpper() ?? "N/A")</span></div>
+        </div>
     </div>
 </div>
 
-@* @if (GetSupplyTotal(SupplyType.Medicine) < 20)
-{
-    <div class="retro-panel">
-        <p class="blink">> WARNING: MEDICINE CRITICAL</p>
-    </div>
-} *@
+@* --- SYSTEM LOG (TODO: lägga in Supply Run händelser!) --- *@
+<div class="retro-panel system-log">
+    <p class="blink">> INCOMING SYSTEM MESSAGES...</p>
+    <p>> Scanning for biological threats... [NONE FOUND]</p>
+    <p>> Power grid stability: 87%</p>
+    @if (AnyCritical())
+    {
+        <p class="warning-text">> ALERT: RESOURCE DEFICIT DETECTED. SEND SCAVENGERS IMMEDIATELY.</p>
+    }
+</div>
 
 @code {
     private List<Supply> supplies = new();
@@ -68,8 +79,9 @@
         shelters = Facade.GetAllShelters();
     }
 
-    private int GetSupplyTotal(SupplyType type)
-    {
-        return supplies.Where(s => s.Type == type).Sum(s => s.AmountInStock);
-    }
+    private int GetSupplyTotal(SupplyType type) =>
+        supplies.Where(s => s.Type == type).Sum(s => s.AmountInStock);
+
+    private bool AnyCritical() =>
+        Enum.GetValues(typeof(SupplyType)).Cast<SupplyType>().Any(t => GetSupplyTotal(t) < 20);
 }

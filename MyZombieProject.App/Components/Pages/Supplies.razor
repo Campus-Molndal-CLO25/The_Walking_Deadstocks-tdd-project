@@ -35,7 +35,7 @@
                 <td>
                     @if (item.AmountInStock < 20)
                     {
-                        <span class="warning">LOW STOCK</span>
+                        <span class="warning blink">LOW</span>
                     }
                     else
                     {
@@ -50,13 +50,10 @@
     </tbody>
 </table>
 
-@if (CriticalSupplies.Any())
+@if (supplies.Any(s => s.AmountInStock < 20))
 {
     <div class="retro-panel">
-        @foreach (var critical in CriticalSupplies)
-        {
-            <p class="warning">> ALERT: @critical.Type.ToString().ToUpper() LEVEL CRITICAL (@critical.AmountInStock LEFT)</p>
-        }
+        <p class="warning blink">> EMERGENCY: RESOURCE LEVELS BELOW 20 - REPLENISH IMMEDIATELY</p>
     </div>
 }
 
@@ -119,7 +116,7 @@
     private List<Supply> supplies = new();
     private Supply newSupply = new Supply();
 
-    
+
     private SupplyType? selectedType;
     private List<Supply> detailedItems = new();
 
@@ -171,6 +168,7 @@
         item.AmountInStock += change;
         if (item.AmountInStock < 0) item.AmountInStock = 0;
         SupplyRepo.Update(item);
+        RefreshData();
         StateHasChanged();
     }
 
@@ -218,12 +216,10 @@
                 OpenInventory(selectedType.Value);
             }
 
-            // Rensa objektet så det inte ligger kvar gammal data till nästa gång
             newSupply = new Supply();
         }
         catch (Exception ex)
         {
-            // Här kan du skriva ut felet i konsolen om det mot förmodan dyker upp igen
             Console.WriteLine(ex.Message);
         }
     }

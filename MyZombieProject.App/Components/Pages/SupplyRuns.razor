@@ -1,25 +1,326 @@
 ﻿@page "/supplyruns"
+@using MyZombieProject.Services
+@using MyZombieProject.App.Models
+@using MyZombieProject.App.Datalayer.Repositories
+@inject OpenWeatherService WeatherService
+@inject ApiKeyState KeyState
+@inject SupplyRepository SupplyRepo
+@inject SurvivorRepository SurvivorRepo
 
 <h1 class="retro-title">SUPPLY RUN PLANNER</h1>
 
-<div class="retro-panel">
-    <p>> PLAN NEW SUPPLY RUN</p>
-    <button class="retro-btn">[ + CREATE SUPPLY RUN ]</button>
+<div class="retro-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+    @* PANEL 1: VÄDERSTATUS *@
+    <div class="retro-panel">
+        <h3>> METEOROLOGICAL SCAN</h3>
+
+        @if (string.IsNullOrEmpty(KeyState.OpenWeatherApiKey))
+        {
+            <p class="warning blink">ACCESS DENIED: API KEY MISSING</p>
+            <p>Please enter satellite credentials in Terminal Settings.</p>
+        }
+        else if (weatherResult == null)
+        {
+            <p class="blink">CONNECTING TO OPENWEATHER SATELLITE...</p>
+        }
+        else if (!weatherResult.Value.Success)
+        {
+            <p class="warning">COMMS ERROR: @weatherResult.Value.Message</p>
+        }
+        else
+        {
+            <p>> CONNECTION ESTABLISHED</p>
+            <p class="weather-data">@weatherResult.Value.Message</p>
+
+           
+            @if (weatherResult.Value.Message.ToLower().Contains("regn") || weatherResult.Value.Message.ToLower().Contains("snö"))
+            {
+                <p class="warning blink">ADVISORY: MISSION HAZARDOUS</p>
+            }
+            else
+            {
+                <p style="color: lime;">ADVISORY: CONDITIONS NOMINAL</p>
+            }
+        }
+    </div>
+
+    @* PANEL 2: LAGERPROGNOS (User Story: Hur länge räcker det?) *@
+    <div class="retro-panel">
+        <h3>> RESOURCE PROGNOSIS</h3>
+        <ul class="retro-list">
+            @foreach (var type in Enum.GetValues(typeof(SupplyType)).Cast<SupplyType>())
+            {
+                var total = GetTotal(type);
+                var daysLeft = CalculateDaysLeft(type, total);
+                <li>
+                    @type.ToString().PadRight(10) : @daysLeft.ToString().PadLeft(2) DAYS REMAINING
+                    @if (daysLeft < 5)
+                    {
+                        <span class="warning blink"> [!!]</span>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
 </div>
 
-<table class="retro-table">
-    <thead>
-        <tr>
-            <th>TARGET</th>
-            <th>RESOURCES</th>
-            <th>STATUS</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>City Ruins</td>
-            <td>Food, Medicine</td>
-            <td>PLANNED</td>
-        </tr>
-    </tbody>
-</table>
+<div class="retro-panel">
+    <p>> SELECT TARGET ZONE</p>
+    <select @bind="selectedZone.Name" class="retro-input" style="background: black; color: lime; border: 1px solid lime; padding: 5px;">
+        @foreach (var zone in availableZones)
+        {
+            <option value="@zone.Name">@zone.Name.ToUpper() (RISK: @zone.Risk%)</option>
+        }
+    </select>
+    <button class="retro-btn" @onclick="CreateNewRun" style="margin-left: 10px;">
+        [ CONFIRM MISSION ]
+    </button>
+</div>
+
+<div class="retro-panel" style="margin-top: 20px;">
+    <p>> CURRENT MISSIONS</p>
+    <button class="retro-btn" @onclick="CreateNewRun">[ + CREATE NEW EXPEDITION ]</button>
+
+    <table class="retro-table">
+        <thead>
+            <tr>
+                <th>TARGET</th>
+                <th>RESOURCES</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var run in activeRuns)
+            {
+                <tr>
+                    <td>@run.Target</td>
+                    <td>@run.Resources</td>
+                    <td>
+                        <span class="@(run.Status == "PLANNED" ? "blink" : run.Status == "ONGOING" ? "warning-text" : "success-text")">
+                            @run.Status
+                        </span>
+                    </td>
+                    <td>
+                        @if (run.Status == "PLANNED")
+                        {
+                            <button class="retro-btn-small" @onclick="() => StartMission(run)">[ DEPLOY ]</button>
+                        }
+                        else if (run.Status == "ONGOING")
+                        {
+                            <button class="retro-btn-small" @onclick="() => CompleteMission(run)">[ RECALL ]</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!string.IsNullOrEmpty(missionReport))
+{
+    <div class="retro-panel @(missionReport.Contains("AMBUSH") ? "critical" : "success")">
+        <p class="blink">> INCOMING TRANSMISSION...</p>
+        <p>@missionReport</p>
+    </div>
+}
+
+@if (isAnalyzing)
+{
+    <div class="retro-panel">
+        <p class="blink" style="color: yellow;">> INCOMING ENCRYPTED SIGNAL...</p>
+        <p>ESTABLISHING CONNECTION TO FIELD SQUAD...</p>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrEmpty(missionReport))
+{
+    <div class="retro-panel @(missionReport.Contains("AMBUSH") ? "critical" : "success")">
+        <p>> MISSION LOG UPDATED:</p>
+        <p>@missionReport</p>
+    </div>
+}
+
+<div class="retro-panel" style="margin-top: 20px; border-color: #444;">
+    <h3 style="color: #666;">> MISSION LOG ARCHIVE</h3>
+    <div class="log-container" style="font-family: 'Courier New', monospace; font-size: 0.8rem;">
+        @if (!missionHistory.Any())
+        {
+            <p style="color: #444;">NO LOGS RECORDED.</p>
+        }
+        else
+        {
+            @foreach (var entry in missionHistory)
+            {
+                <p style="color: @(entry.Contains("FAILED") ? "#822" : "#282"); margin: 2px 0;">
+                    @entry
+                </p>
+            }
+        }
+    </div>
+</div>
+@code {
+    private ForecastResult? weatherResult;
+    private List<Supply> allSupplies = new();
+    private List<SupplyRun> activeRuns = new();
+    private bool isAnalyzing = false;
+
+    private int totalSurvivors;
+
+    private struct Zone
+    {
+        public string Name;
+        public int Risk;
+        public int MinLoot;
+        public int MaxLoot;
+        public string ResourceType;
+    }
+
+    private Zone selectedZone = new Zone { Name = "Suburban Houses", Risk = 5, MinLoot = 10, MaxLoot = 30, ResourceType = "Food" };
+
+    private List<Zone> availableZones = new() {
+        new Zone { Name = "Suburban Houses", Risk = 5, MinLoot = 10, MaxLoot = 30, ResourceType = "Food" },
+        new Zone { Name = "Abandoned Mall", Risk = 20, MinLoot = 40, MaxLoot = 80, ResourceType = "Food" },
+        new Zone { Name = "Military Hospital", Risk = 50, MinLoot = 60, MaxLoot = 150, ResourceType = "Medicine" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        selectedZone = availableZones[0];
+        activeRuns.Add(new SupplyRun { Target = "City Ruins", Resources = "Food, Medicine", Status = "PLANNED" });
+        allSupplies = SupplyRepo.GetAllSupplies();
+        // Räkna hur många munnar som ska mättas
+        totalSurvivors = SurvivorRepo.GetAllSurvivors().Count;
+
+        if (!string.IsNullOrEmpty(KeyState.OpenWeatherApiKey))
+        {
+            weatherResult = await WeatherService.GetForecastAsync("Gothenburg", KeyState.OpenWeatherApiKey);
+        }
+    }
+
+    private int GetTotal(SupplyType type) => allSupplies.Where(s => s.Type == type).Sum(s => s.AmountInStock);
+
+    private int CalculateDaysLeft(SupplyType type, int total)
+    {
+        if (total <= 0 || totalSurvivors == 0) return 0;
+
+        // Förbrukningen per person/dag
+        double dailyUsagePerPerson = type switch
+        {
+            SupplyType.Food => 0.5,      // En halv ranson per person
+            SupplyType.Medicine => 0.1,  // Medicin går inte åt lika ofta
+            SupplyType.Ammo => 0.2,      // Lite ammo går åt till vakter
+            _ => 0.1
+        };
+
+        double totalDailyUsage = totalSurvivors * dailyUsagePerPerson;
+
+        
+        return (int)Math.Floor(total / totalDailyUsage);
+    }
+
+    private void UpdateInventory(string resourceType, int amount)
+    {
+        // Hitta alla föremål av rätt typ (t.ex. alla som är Food)
+        var itemsOfType = allSupplies.Where(s => s.Type.ToString() == resourceType).ToList();
+
+        if (itemsOfType.Any())
+        {
+            // Slumpa vilken av matvarorna vi hittade (Korv, Sparris eller Ravioli)
+            Random r = new Random();
+            var selectedItem = itemsOfType[r.Next(itemsOfType.Count)];
+
+            selectedItem.AmountInStock += amount;
+            SupplyRepo.Update(selectedItem);
+
+            missionReport += $" (Found: {selectedItem.Name})";
+        }
+    }
+
+    private void AddToLog(SupplyRun run)
+    {
+        string timestamp = DateTime.Now.ToString("HH:mm");
+        string statusText = run.Status == "FAILED" ? "K.I.A. - SQUAD LOST" : "SUCCESS - LOOT SECURED";
+        missionHistory.Insert(0, $"[{timestamp}] {run.Target}: {statusText}");
+
+        if (missionHistory.Count > 10) missionHistory.RemoveAt(10);
+    }
+
+    private void CreateNewRun()
+    {
+        // TODO: Här kan vi senare öppna en modal, men just nu skapar vi en slumpmässig run!
+        activeRuns.Add(new SupplyRun
+        {
+            Target = selectedZone.Name,
+            Resources = selectedZone.ResourceType,
+            Status = "PLANNED"
+        });
+    }
+
+    private void StartMission(SupplyRun run)
+    {
+        run.Status = "ONGOING";
+        // TODO: Här kan vi i framtiden lägga till en timer!
+    }
+
+    private string missionReport = ""; 
+
+	private List<string> missionHistory = new();
+
+    private async Task CompleteMission(SupplyRun run)
+    {
+        var zone = availableZones.FirstOrDefault(z => z.Name == run.Target);
+        int riskFactor = zone.Name != null ? zone.Risk : 15;
+
+        isAnalyzing = true;
+        missionReport = ""; 
+        StateHasChanged(); 
+
+        // Vänta 3 sekunder för att simulera radiokommunikation från fältet
+        await Task.Delay(3000);
+
+        Random dice = new Random();
+        int roll = dice.Next(1, 101);
+
+        if (roll <= riskFactor) // MISSYCKANDE
+        {
+            run.Status = "FAILED";
+
+            
+            Random r = new Random();
+            int lostSurvivors = r.Next(1, 4);
+
+            
+            var survivors = SurvivorRepo.GetAllSurvivors();
+            for (int i = 0; i < lostSurvivors && survivors.Count > 0; i++)
+            {
+                var victim = survivors[0]; 
+                SurvivorRepo.Delete(victim.Id);
+                survivors.RemoveAt(0);
+            }
+
+            missionReport = $"!!! K.I.A. !!! SQUAD WIPED OUT. {lostSurvivors} SURVIVORS LOST AT {run.Target.ToUpper()}.";
+
+           
+            totalSurvivors = SurvivorRepo.GetAllSurvivors().Count;
+        }
+        else
+        {
+            // Slumpa loot baserat på zonens Min/Max
+            int lootAmount = dice.Next(zone.MinLoot, zone.MaxLoot);
+            run.Status = "COMPLETED";
+            missionReport = $"REPORT: {run.Target} CLEARED. +{lootAmount} {run.Resources} SECURED.";
+
+            
+            UpdateInventory(run.Resources, lootAmount);
+        }
+
+        AddToLog(run);
+        isAnalyzing = false;
+        StateHasChanged();
+    }
+
+}

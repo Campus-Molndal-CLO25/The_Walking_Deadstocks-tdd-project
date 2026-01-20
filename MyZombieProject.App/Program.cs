@@ -19,17 +19,26 @@ namespace MyZombieProject.App
             builder.Services.AddScoped<SurvivorRepository>();
             builder.Services.AddScoped<ShelterRepository>();
             builder.Services.AddScoped<DataFacade>();
-            // Toms väder-tjänster
+            
             builder.Services.AddScoped<OpenWeatherService>();
 
-            // Om Tom har skapat en tjänst för att hantera API-nyckeln (ApiKeyService eller liknande)
-            // så måste den också in här. Kolla i Toms filer om han har en klass som heter så!
-            builder.Services.AddScoped<ApiKeyState>(); // Exempelnamn, kolla vad Tom döpt sin till!
+            builder.Services.AddScoped<ApiKeyState>(); 
 
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+           
             builder.Services.AddHttpClient();
+
+           
+            builder.Services.AddHttpClient("openweather", client =>
+            {
+                client.BaseAddress = new Uri("https://api.openweathermap.org/");
+            });
+
+          
+            builder.Services.AddScoped<OpenWeatherService>();
+            builder.Services.AddScoped<ApiKeyState>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
