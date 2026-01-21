@@ -4,7 +4,20 @@ using MyZombieProject.App.Models;
 
 namespace MyZombieProject.App.Datalayer.Repositories
 {
-    public class ShelterRepository
+    public interface IShelterRepository
+    {
+        int Add(Shelter shelter);
+
+        Shelter GetById(int id);
+
+        void Update(Shelter shelter);
+
+        void Delete(int id);
+
+        List<Shelter> GetAllShelters();
+    }
+
+    public class ShelterRepository : IShelterRepository
     {
         private readonly MyZombieDataContext _context;
 
