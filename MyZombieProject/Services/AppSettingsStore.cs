@@ -36,7 +36,12 @@ public sealed class AppSettingsStore
     }
 }
 
+
+
 public sealed class AppSettings
 {
     public string? OpenWeatherApiKey { get; set; }
+    public string? GeminiApiKey { get; set; }
+
+    public string? GeminiModel { get; set; }
 }

@@ -2,11 +2,8 @@
 
 <Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <ApiKeyGate>
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MyZombieProject.Components.Layout.MainLayout)" />
-        </ApiKeyGate>
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MyZombieProject.Components.Layout.MainLayout)" />
     </Found>
-
     <NotFound>
         <LayoutView Layout="@typeof(MyZombieProject.Components.Layout.MainLayout)">
             <p>Sorry, nothing here.</p>

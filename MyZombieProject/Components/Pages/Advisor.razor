@@ -1,0 +1,39 @@
+﻿@page "/advisor"
+@using MyZombieProject.Services
+@inject GeminiService Gemini
+@inject AppSettingsStore SettingsStore
+
+<h1>Shelter Advisor (Gemini)</h1>
+
+<p>Exempel: <code>/advisor?question=Hur%20sparar%20vi%20vatten%20i%20sheltern%3F</code></p>
+
+<p><b>Question:</b> @Question</p>
+<p><b>Status:</b> @Status</p>
+
+<pre style="white-space:pre-wrap; border:1px solid #ccc; padding:10px;">@Answer</pre>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? question { get; set; }
+
+    private string Question => string.IsNullOrWhiteSpace(question) ? "Hur prioriterar vi mat, vatten och värme första dygnet?" : question!;
+    private string Status = "Loading...";
+    private string Answer = "—";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var settings = await SettingsStore.LoadAsync();
+            var key = settings.GeminiApiKey ?? "";
+
+            Answer = await Gemini.AskSurvivalAdvisorAsync(Question, key, settings.GeminiModel);
+            Status = "OK";
+        }
+        catch (Exception ex)
+        {
+            Status = "Crash";
+            Answer = ex.ToString();
+        }
+    }
+}
