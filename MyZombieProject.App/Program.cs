@@ -22,7 +22,9 @@ namespace MyZombieProject.App
             
             builder.Services.AddScoped<OpenWeatherService>();
 
-            builder.Services.AddScoped<ApiKeyState>(); 
+            builder.Services.AddScoped<ApiKeyState>();
+            builder.Services.AddSingleton<MissionService>();
+            builder.Services.AddSingleton<AppSettingsStore>();
 
             // Add services to the container.
             builder.Services.AddRazorComponents()

@@ -11,5 +11,9 @@
         public int? ShelterId { get; set; }
 
         public Shelter? Shelter { get; set; }
+
+        public int Health { get; set; } = 100;
+        public bool IsInjured => Health < 100;
+        public bool IsOnMission { get; set; } = false;
     }
 }

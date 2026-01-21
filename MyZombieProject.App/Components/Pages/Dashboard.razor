@@ -3,7 +3,10 @@
 @using MyZombieProject.App.Models
 @using MyZombieProject.App.Datalayer.Repositories
 @using MyZombieProject.App.Datalayer
+@using MyZombieProject.Services
 @inject DataFacade Facade
+@inject OpenWeatherService WeatherService
+@inject AppSettingsStore SettingsStore
 @rendermode InteractiveServer
 
 <h1 class="retro-title">CLAN STATUS TERMINAL</h1>
@@ -12,6 +15,25 @@
     <div class="header-line">> SYSTEM STATUS: <span class="status-online">ONLINE</span></div>
     <div class="header-line">> DATE: @DateTime.Now.ToString("yyyy-MM-dd") | TIME: @DateTime.Now.ToString("HH:mm:ss")</div>
     <div class="header-line">> LOCATION: GOTHENBURG SECTOR-7</div>
+</div>
+
+@* --- ATMOSPHERIC SENSORS BOX --- *@
+<div class="retro-box">
+    <div class="box-header">[ ATMOSPHERIC SENSORS ]</div>
+    <div class="box-content">
+        @if (weatherLoading)
+        {
+            <p class="blink">> SCANNING LONG-RANGE RADAR...</p>
+        }
+        else if (!string.IsNullOrEmpty(weatherReport))
+        {
+            <p style="font-size: 0.9rem; line-height: 1.4;">> @weatherReport</p>
+        }
+        else
+        {
+            <p class="crit">> SENSOR ERROR: NO SIGNAL</p>
+        }
+    </div>
 </div>
 
 <div class="dashboard-grid">
@@ -71,6 +93,26 @@
     private List<Supply> supplies = new();
     private List<Survivor> survivors = new();
     private List<Shelter> shelters = new();
+    private string weatherReport = "";
+    private bool weatherLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var settings = await SettingsStore.LoadAsync();
+        string myKey = settings.OpenWeatherApiKey ?? "";
+
+        // 2. Skicka med nyckeln till vädertjänsten
+        if (!string.IsNullOrEmpty(myKey))
+        {
+            var result = await WeatherService.GetForecastAsync("Gothenburg,se", myKey);
+            weatherReport = result.Message;
+        }
+        else
+        {
+            weatherReport = "ERROR: No API Key found in Documents/MyZombieProject/settings.json";
+        }
+
+    }
 
     protected override void OnInitialized()
     {

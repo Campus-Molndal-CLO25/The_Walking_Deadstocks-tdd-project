@@ -6,6 +6,7 @@
 @inject ApiKeyState KeyState
 @inject SupplyRepository SupplyRepo
 @inject SurvivorRepository SurvivorRepo
+@inject MissionService MissionLog
 
 <h1 class="retro-title">SUPPLY RUN PLANNER</h1>
 
@@ -73,6 +74,35 @@
             <option value="@zone.Name">@zone.Name.ToUpper() (RISK: @zone.Risk%)</option>
         }
     </select>
+    @* <div class="survivor-selection">
+        <h3>DEBUG: TOTAL SURVIVORS FOUND: @survivors.Count</h3>
+
+        @if (survivors.Count == 0)
+        {
+            <p style="color: red;">CRITICAL ERROR: No survivors found in database!</p>
+        }
+
+        @foreach (var s in survivors)
+        {
+            <div style="border: 1px solid white; margin: 5px; padding: 5px;">
+                NAME: @s.Name | HP: @s.Health
+            </div>
+        }
+    </div> *@
+    <div class="survivor-selection">
+        <h3>SELECT SQUAD MEMBERS</h3>
+        @foreach (var s in survivors.Where(x => x.Health > 0))
+        {
+            <div class="survivor-row">
+                <input type="checkbox" @bind="s.IsOnMission" disabled="@(s.Health < 30)" />
+                <span>@s.Name (HP: @s.Health%)</span>
+                @if (s.Health < 30)
+                {
+                    <span class="crit">[TOO WEAK]</span>
+                }
+            </div>
+        }
+    </div>
     <button class="retro-btn" @onclick="CreateNewRun" style="margin-left: 10px;">
         [ CONFIRM MISSION ]
     </button>
@@ -168,6 +198,8 @@ else if (!string.IsNullOrEmpty(missionReport))
     private List<SupplyRun> activeRuns = new();
     private bool isAnalyzing = false;
 
+    private List<Survivor> survivors = new();
+
     private int totalSurvivors;
 
     private struct Zone
@@ -189,11 +221,24 @@ else if (!string.IsNullOrEmpty(missionReport))
 
     protected override async Task OnInitializedAsync()
     {
+
         selectedZone = availableZones[0];
         activeRuns.Add(new SupplyRun { Target = "City Ruins", Resources = "Food, Medicine", Status = "PLANNED" });
         allSupplies = SupplyRepo.GetAllSupplies();
-        // Räkna hur många munnar som ska mättas
-        totalSurvivors = SurvivorRepo.GetAllSurvivors().Count;
+
+
+        survivors = SurvivorRepo.GetAllSurvivors();
+
+        foreach (var s in survivors)
+        {
+            if (s.Health == 0)
+            {
+                s.Health = 100;
+                SurvivorRepo.Update(s); // Sparar ner 100 HP i databasen
+            }
+        }
+        totalSurvivors = survivors.Count;
+
 
         if (!string.IsNullOrEmpty(KeyState.OpenWeatherApiKey))
         {
@@ -218,7 +263,7 @@ else if (!string.IsNullOrEmpty(missionReport))
 
         double totalDailyUsage = totalSurvivors * dailyUsagePerPerson;
 
-        
+
         return (int)Math.Floor(total / totalDailyUsage);
     }
 
@@ -251,13 +296,26 @@ else if (!string.IsNullOrEmpty(missionReport))
 
     private void CreateNewRun()
     {
-        // TODO: Här kan vi senare öppna en modal, men just nu skapar vi en slumpmässig run!
+
+        var selectedTeam = survivors.Where(s => s.IsOnMission).ToList();
+
+        if (!selectedTeam.Any())
+        {
+            missionReport = "ERROR: NO SQUAD MEMBERS SELECTED!";
+            return;
+        }
+
+        string teamNames = string.Join(", ", selectedTeam.Select(s => s.Name));
+
         activeRuns.Add(new SupplyRun
         {
             Target = selectedZone.Name,
             Resources = selectedZone.ResourceType,
-            Status = "PLANNED"
+            Status = "PLANNED",
+
         });
+
+        foreach (var s in survivors) s.IsOnMission = false;
     }
 
     private void StartMission(SupplyRun run)
@@ -268,19 +326,54 @@ else if (!string.IsNullOrEmpty(missionReport))
 
     private string missionReport = ""; 
 
-	private List<string> missionHistory = new();
+    private List<string> missionHistory = new();
+
+    private void ResolveMission(Survivor survivor, int risk)
+    {
+        var roll = new Random().Next(1, 101);
+
+        if (roll <= risk) // Misslyckande
+        {
+            // 50% chans att överleva men bli skadad, annars död
+            if (new Random().Next(1, 101) > 50)
+            {
+                survivor.Health -= 50;
+                MissionLog.AddLog($"{survivor.Name} returned wounded from the mission.");
+            }
+            else
+            {
+                // Kod för att ta bort survivor (Död)
+                MissionLog.AddLog($"{survivor.Name} was lost in action.");
+            }
+        }
+        else
+        {
+            MissionLog.AddLog($"{survivor.Name} returned safely with supplies!");
+        }
+    }
 
     private async Task CompleteMission(SupplyRun run)
     {
         var zone = availableZones.FirstOrDefault(z => z.Name == run.Target);
         int riskFactor = zone.Name != null ? zone.Risk : 15;
 
-        isAnalyzing = true;
-        missionReport = ""; 
-        StateHasChanged(); 
+        // Hämta de som är ikryssade
+        var squad = survivors.Where(s => s.IsOnMission).ToList();
 
-        // Vänta 3 sekunder för att simulera radiokommunikation från fältet
-        await Task.Delay(3000);
+        // OM ingen är ikryssad (t.ex. vid omstart), ta alla som har hälsa kvar som en nödlösning
+        if (!squad.Any())
+        {
+            squad = survivors.Where(s => s.Health > 0).ToList();
+            MissionLog.AddLog("RECOVERY MODE: Emergency signal received from all active units.");
+        }
+
+        isAnalyzing = true;
+        // ... resten av koden är densamma
+
+        missionReport = "";
+        StateHasChanged();
+
+        await Task.Delay(3000); // Simulera radiokommunikation
 
         Random dice = new Random();
         int roll = dice.Next(1, 101);
@@ -288,35 +381,42 @@ else if (!string.IsNullOrEmpty(missionReport))
         if (roll <= riskFactor) // MISSYCKANDE
         {
             run.Status = "FAILED";
+            missionReport = $"!!! AMBUSH !!! Squad at {run.Target.ToUpper()} took heavy fire!";
 
-            
-            Random r = new Random();
-            int lostSurvivors = r.Next(1, 4);
-
-            
-            var survivors = SurvivorRepo.GetAllSurvivors();
-            for (int i = 0; i < lostSurvivors && survivors.Count > 0; i++)
+            foreach (var member in squad)
             {
-                var victim = survivors[0]; 
-                SurvivorRepo.Delete(victim.Id);
-                survivors.RemoveAt(0);
+                // 70% chans att bli skadad (-50 HP), 30% chans att dö
+                if (dice.Next(1, 101) > 30)
+                {
+                    member.Health -= 50;
+                    if (member.Health < 0) member.Health = 0;
+                    MissionLog.AddLog($"{member.Name} returned critically wounded from {run.Target}.");
+                    SurvivorRepo.Update(member); // Spara skadan i DB
+                }
+                else
+                {
+                    member.Health = 0;
+                    MissionLog.AddLog($"{member.Name} was lost in the chaos at {run.Target}.");
+                    SurvivorRepo.Delete(member.Id); // Ta bort från DB (K.I.A)
+                }
             }
-
-            missionReport = $"!!! K.I.A. !!! SQUAD WIPED OUT. {lostSurvivors} SURVIVORS LOST AT {run.Target.ToUpper()}.";
-
-           
-            totalSurvivors = SurvivorRepo.GetAllSurvivors().Count;
         }
-        else
+        else // SUCESS
         {
-            // Slumpa loot baserat på zonens Min/Max
             int lootAmount = dice.Next(zone.MinLoot, zone.MaxLoot);
             run.Status = "COMPLETED";
-            missionReport = $"REPORT: {run.Target} CLEARED. +{lootAmount} {run.Resources} SECURED.";
+            missionReport = $"REPORT: {run.Target} SECURED. +{lootAmount} {run.Resources} COLLECTED.";
 
-            
             UpdateInventory(run.Resources, lootAmount);
+
+            foreach (var member in squad)
+            {
+                MissionLog.AddLog($"{member.Name} returned safely from {run.Target}.");
+            }
         }
+
+        // Nollställ statusen så de inte är "på uppdrag" längre
+        foreach (var s in survivors) s.IsOnMission = false;
 
         AddToLog(run);
         isAnalyzing = false;
