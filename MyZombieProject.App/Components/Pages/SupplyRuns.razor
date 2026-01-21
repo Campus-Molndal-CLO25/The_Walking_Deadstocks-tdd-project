@@ -74,21 +74,7 @@
             <option value="@zone.Name">@zone.Name.ToUpper() (RISK: @zone.Risk%)</option>
         }
     </select>
-    @* <div class="survivor-selection">
-        <h3>DEBUG: TOTAL SURVIVORS FOUND: @survivors.Count</h3>
-
-        @if (survivors.Count == 0)
-        {
-            <p style="color: red;">CRITICAL ERROR: No survivors found in database!</p>
-        }
-
-        @foreach (var s in survivors)
-        {
-            <div style="border: 1px solid white; margin: 5px; padding: 5px;">
-                NAME: @s.Name | HP: @s.Health
-            </div>
-        }
-    </div> *@
+   
     <div class="survivor-selection">
         <h3>SELECT SQUAD MEMBERS</h3>
         @foreach (var s in survivors.Where(x => x.Health > 0))
@@ -368,7 +354,7 @@ else if (!string.IsNullOrEmpty(missionReport))
         }
 
         isAnalyzing = true;
-        // ... resten av koden är densamma
+       
 
         missionReport = "";
         StateHasChanged();
