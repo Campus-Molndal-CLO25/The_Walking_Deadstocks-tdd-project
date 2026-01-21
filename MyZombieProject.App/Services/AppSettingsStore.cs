@@ -19,7 +19,14 @@ public sealed class AppSettingsStore
             return new AppSettings();
 
         var json = await File.ReadAllTextAsync(SettingsPath);
-        return JsonSerializer.Deserialize<AppSettings>(json)
+
+        // Lägg till dessa options för att ignorera stora/små bokstäver!
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        return JsonSerializer.Deserialize<AppSettings>(json, options)
                ?? new AppSettings();
     }
 
@@ -36,7 +43,12 @@ public sealed class AppSettingsStore
     }
 }
 
+
+
 public sealed class AppSettings
 {
     public string? OpenWeatherApiKey { get; set; }
+    public string? GeminiApiKey { get; set; }
+
+    public string? GeminiModel { get; set; }
 }

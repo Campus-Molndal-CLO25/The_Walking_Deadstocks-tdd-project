@@ -379,6 +379,13 @@ input, select, button {
         font-family: 'Courier New', monospace;
     }
 
+.terminal-content {
+    white-space: pre-wrap;
+    color: #33ff33;
+    text-shadow: 0 0 5px rgba(51, 255, 51, 0.7);
+    line-height: 1.6;
+}
+
 
 @keyframes blink {
     to {

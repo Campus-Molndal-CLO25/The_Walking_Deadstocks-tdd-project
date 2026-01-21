@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MyZombieProject.App.Datalayer;
 using MyZombieProject.App.Datalayer.Repositories;
 using MyZombieProject.Services;
+using System.Net.Http.Headers;
 
 namespace MyZombieProject.App
 {
@@ -19,10 +20,7 @@ namespace MyZombieProject.App
             builder.Services.AddScoped<ISurvivorRepository, SurvivorRepository>();
             builder.Services.AddScoped<IShelterRepository, ShelterRepository>();
             builder.Services.AddScoped<DataFacade>();
-            
-            builder.Services.AddScoped<OpenWeatherService>();
 
-            builder.Services.AddScoped<ApiKeyState>();
             builder.Services.AddSingleton<MissionService>();
             builder.Services.AddSingleton<AppSettingsStore>();
 
@@ -32,14 +30,26 @@ namespace MyZombieProject.App
            
             builder.Services.AddHttpClient();
 
-           
+
+            // HttpClient: OpenWeather
             builder.Services.AddHttpClient("openweather", client =>
             {
                 client.BaseAddress = new Uri("https://api.openweathermap.org/");
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
             });
 
-          
+            // HttpClient: Gemini
+            builder.Services.AddHttpClient("gemini", client =>
+            {
+                client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+            });
+
+
             builder.Services.AddScoped<OpenWeatherService>();
+            builder.Services.AddScoped<GeminiService>();
             builder.Services.AddScoped<ApiKeyState>();
             var app = builder.Build();
 

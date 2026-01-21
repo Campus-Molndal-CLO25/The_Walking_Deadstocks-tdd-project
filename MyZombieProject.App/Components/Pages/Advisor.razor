@@ -1,0 +1,79 @@
+﻿@page "/advisor"
+@using MyZombieProject.Services
+@inject GeminiService Gemini
+@inject AppSettingsStore SettingsStore
+
+<div class="container mt-4">
+    <h1 class="terminal-header mb-4">SHELTER ADVISOR v1.0</h1>
+
+    <div class="terminal-box">
+        <div class="status-line">
+            SYSTEM STATUS: @Status <span class="scan-animation">_</span>
+        </div>
+
+        <div class="scan-query mb-3">
+            > SCANNING FOR: "@Question"
+        </div>
+
+        <div class="terminal-content">
+            @if (IsLoading)
+            {
+                <span class="text-warning">UPPRÄTTAR ANSLUTNING... VÄNTA...</span>
+            }
+            else
+            {
+                @Answer
+            }
+        </div>
+    </div>
+
+    <div class="input-group mt-3 terminal-input-group">
+        <input @bind="userInput" @onkeyup="HandleKeyUp"
+               class="form-control bg-black text-success border-success"
+               placeholder="Skriv din fråga här..." />
+        <button class="btn btn-success" @onclick="AskGemson" disabled="@IsLoading">SKICKA</button>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? question { get; set; }
+
+    private string? userInput;
+    private bool IsLoading = false;
+    private string Status = "OK";
+    private string Answer = "System redo. Mata in förfrågan för överlevnadsstrategi.";
+
+    // Vi behåller din smarta Question-logik
+    private string Question => string.IsNullOrWhiteSpace(userInput)
+        ? (string.IsNullOrWhiteSpace(question) ? "Hur prioriterar vi mat, vatten och värme första dygnet?" : question!)
+        : userInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Om det redan finns en fråga i URL:en, kör den direkt
+        if (!string.IsNullOrEmpty(question)) { await AskGemson(); }
+    }
+
+    private async Task AskGemson()
+    {
+        IsLoading = true;
+        try
+        {
+            var settings = await SettingsStore.LoadAsync();
+            Answer = await Gemini.AskSurvivalAdvisorAsync(Question, settings.GeminiApiKey ?? "", settings.GeminiModel);
+            Status = "OK";
+        }
+        catch (Exception ex)
+        {
+            Status = "ERROR";
+            Answer = "KOMMUNIKATIONSAVBROTT: " + ex.Message;
+        }
+        finally { IsLoading = false; }
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") { await AskGemson(); }
+    }
+}

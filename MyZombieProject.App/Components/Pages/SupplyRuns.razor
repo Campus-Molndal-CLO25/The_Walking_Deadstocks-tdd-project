@@ -4,9 +4,10 @@
 @using MyZombieProject.App.Datalayer.Repositories
 @inject OpenWeatherService WeatherService
 @inject ApiKeyState KeyState
-@inject SupplyRepository SupplyRepo
-@inject SurvivorRepository SurvivorRepo
+@inject ISupplyRepository SupplyRepo
+@inject ISurvivorRepository SurvivorRepo
 @inject MissionService MissionLog
+@inject AppSettingsStore SettingsStore
 
 <h1 class="retro-title">SUPPLY RUN PLANNER</h1>
 
@@ -16,14 +17,13 @@
     <div class="retro-panel">
         <h3>> METEOROLOGICAL SCAN</h3>
 
-        @if (string.IsNullOrEmpty(KeyState.OpenWeatherApiKey))
+        @if (weatherLoading)
         {
-            <p class="warning blink">ACCESS DENIED: API KEY MISSING</p>
-            <p>Please enter satellite credentials in Terminal Settings.</p>
+            <p class="blink">> SCANNING LONG-RANGE RADAR...</p>
         }
         else if (weatherResult == null)
         {
-            <p class="blink">CONNECTING TO OPENWEATHER SATELLITE...</p>
+            <p class="warning">ACCESS DENIED: API KEY MISSING</p>
         }
         else if (!weatherResult.Value.Success)
         {
@@ -34,7 +34,6 @@
             <p>> CONNECTION ESTABLISHED</p>
             <p class="weather-data">@weatherResult.Value.Message</p>
 
-           
             @if (weatherResult.Value.Message.ToLower().Contains("regn") || weatherResult.Value.Message.ToLower().Contains("snö"))
             {
                 <p class="warning blink">ADVISORY: MISSION HAZARDOUS</p>
@@ -67,8 +66,9 @@
 </div>
 
 <div class="retro-panel">
+    <h3>MISSION PLANNING</h3>
     <p>> SELECT TARGET ZONE</p>
-    <select @bind="selectedZone.Name" class="retro-input" style="background: black; color: lime; border: 1px solid lime; padding: 5px;">
+    <select @onchange="OnZoneChange" class="retro-input" style="background: black; color: lime; border: 1px solid lime; padding: 5px;">
         @foreach (var zone in availableZones)
         {
             <option value="@zone.Name">@zone.Name.ToUpper() (RISK: @zone.Risk%)</option>
@@ -76,7 +76,7 @@
     </select>
    
     <div class="survivor-selection">
-        <h3>SELECT SQUAD MEMBERS</h3>
+        <p>> SELECT SQUAD MEMBERS</p>
         @foreach (var s in survivors.Where(x => x.Health > 0))
         {
             <div class="survivor-row">
@@ -183,6 +183,7 @@ else if (!string.IsNullOrEmpty(missionReport))
     private List<Supply> allSupplies = new();
     private List<SupplyRun> activeRuns = new();
     private bool isAnalyzing = false;
+    private bool weatherLoading = true;
 
     private List<Survivor> survivors = new();
 
@@ -197,6 +198,12 @@ else if (!string.IsNullOrEmpty(missionReport))
         public string ResourceType;
     }
 
+    private void OnZoneChange(ChangeEventArgs e)
+    {
+        var name = e.Value.ToString();
+        selectedZone = availableZones.FirstOrDefault(z => z.Name == name);
+    }
+
     private Zone selectedZone = new Zone { Name = "Suburban Houses", Risk = 5, MinLoot = 10, MaxLoot = 30, ResourceType = "Food" };
 
     private List<Zone> availableZones = new() {
@@ -207,12 +214,13 @@ else if (!string.IsNullOrEmpty(missionReport))
 
     protected override async Task OnInitializedAsync()
     {
-
+        // 1. BEHÅLL: Allt som rör zoner, supplies och survivors
         selectedZone = availableZones[0];
+
+        // Denna rad skapar en test-expedition varje gång du laddar sidan
         activeRuns.Add(new SupplyRun { Target = "City Ruins", Resources = "Food, Medicine", Status = "PLANNED" });
+
         allSupplies = SupplyRepo.GetAllSupplies();
-
-
         survivors = SurvivorRepo.GetAllSurvivors();
 
         foreach (var s in survivors)
@@ -220,16 +228,22 @@ else if (!string.IsNullOrEmpty(missionReport))
             if (s.Health == 0)
             {
                 s.Health = 100;
-                SurvivorRepo.Update(s); // Sparar ner 100 HP i databasen
+                SurvivorRepo.Update(s);
             }
         }
         totalSurvivors = survivors.Count;
 
+        
+        weatherLoading = true;
+        var settings = await SettingsStore.LoadAsync();
+        string myKey = settings.OpenWeatherApiKey ?? "";
 
-        if (!string.IsNullOrEmpty(KeyState.OpenWeatherApiKey))
+        if (!string.IsNullOrEmpty(myKey))
         {
-            weatherResult = await WeatherService.GetForecastAsync("Gothenburg", KeyState.OpenWeatherApiKey);
+            weatherResult = await WeatherService.GetForecastAsync("Gothenburg", myKey);
         }
+        weatherLoading = false;
+        StateHasChanged();
     }
 
     private int GetTotal(SupplyType type) => allSupplies.Where(s => s.Type == type).Sum(s => s.AmountInStock);
@@ -341,7 +355,12 @@ else if (!string.IsNullOrEmpty(missionReport))
     private async Task CompleteMission(SupplyRun run)
     {
         var zone = availableZones.FirstOrDefault(z => z.Name == run.Target);
-        int riskFactor = zone.Name != null ? zone.Risk : 15;
+        int riskFactor = selectedZone.Risk > 0 ? selectedZone.Risk : 15;
+
+        if (weatherResult != null && (weatherResult.Value.Message.Contains("Regn") || weatherResult.Value.Message.Contains("Snö")))
+        {
+            riskFactor += 15; 
+        }
 
         // Hämta de som är ikryssade
         var squad = survivors.Where(s => s.IsOnMission).ToList();

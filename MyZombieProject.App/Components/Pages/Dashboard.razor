@@ -18,7 +18,7 @@
 </div>
 
 @* --- ATMOSPHERIC SENSORS BOX --- *@
-<div class="retro-box">
+@* <div class="retro-box">
     <div class="box-header">[ ATMOSPHERIC SENSORS ]</div>
     <div class="box-content">
         @if (weatherLoading)
@@ -34,7 +34,7 @@
             <p class="crit">> SENSOR ERROR: NO SIGNAL</p>
         }
     </div>
-</div>
+</div> *@
 
 <div class="dashboard-grid">
     @* --- RESOURCE MONITOR --- *@
@@ -100,8 +100,9 @@
     {
         var settings = await SettingsStore.LoadAsync();
         string myKey = settings.OpenWeatherApiKey ?? "";
+        // TEST: Skriv ut längden på nyckeln (för att inte visa hela nyckeln på skärmen)
+        Console.WriteLine($"DEBUG: Nyckelns längd är {myKey.Length} tecken.");
 
-        // 2. Skicka med nyckeln till vädertjänsten
         if (!string.IsNullOrEmpty(myKey))
         {
             var result = await WeatherService.GetForecastAsync("Gothenburg,se", myKey);

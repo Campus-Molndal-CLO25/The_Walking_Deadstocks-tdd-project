@@ -40,8 +40,14 @@ namespace MyZombieProject.App.Datalayer.Repositories
 
         public void Update(Survivor survivor)
         {
-            _context.Entry(survivor).State = EntityState.Modified;
-            _context.SaveChanges();
+            var existing = _context.Survivors.Find(survivor.Id);
+
+            if (existing != null)
+            {
+                _context.Entry(existing).CurrentValues.SetValues(survivor);
+
+                _context.SaveChanges();
+            }
         }
 
         public void Delete(int id)
