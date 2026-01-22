@@ -15,6 +15,7 @@
     <thead>
         <tr>
             <th>NAME</th>
+            <th>HEALTH</th>
             <th>AGE</th>
             <th>ASSIGNED SHELTER</th>
             <th>ACTIONS</th>
@@ -25,10 +26,24 @@
         {
             <tr>
                 <td>@person.Name</td>
+                <td>
+                    <span style="color: @(person.Health < 30 ? "red" : "#33ff33")">
+                        @person.Health%
+                    </span>
+                </td>
                 <td>@person.Age</td>
                 <td>@(person.Shelter?.Name ?? "WANDERER")</td>
                 <td>
                     <button class="retro-btn" @onclick="() => PrepareEdit(person)">[ EDIT ]</button>
+
+                    @if (person.Health < 100)
+                    {
+                        <button class="retro-btn" style="color: #ff00ff; border-color: #ff00ff;"
+                                @onclick="() => HealSurvivor(person)">
+                            [ MEDICINE ]
+                        </button>
+                    }
+
                     <button class="retro-btn" @onclick="() => DeleteSurvivor(person.Id)">[ REMOVE ]</button>
                 </td>
             </tr>
@@ -114,5 +129,26 @@
     {
         Facade.DeleteSurvivor(id);
         RefreshData();
+    }
+
+    private void HealSurvivor(Survivor person)
+    {
+        // 1. Kolla om vi har Medkits via din Facade eller Repository
+        // (Om du inte har en metod för Supplies i Facaden än, kan vi fejka kollen
+        // eller bara köra på HP-ändringen för demot imorgon!)
+
+        if (person.Health < 100)
+        {
+            // 2. Uppdatera hälsan
+            person.Health = Math.Min(100, person.Health + 25);
+
+            // 3. Spara via din Facade (den har ju redan UpdateSurvivor!)
+            Facade.UpdateSurvivor(person);
+
+            // 4. Ladda om listan så siffran ändras på skärmen
+            RefreshData();
+
+            Console.WriteLine($"{person.Name} medicinerad!");
+        }
     }
 }
