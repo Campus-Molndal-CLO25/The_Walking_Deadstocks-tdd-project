@@ -44,7 +44,7 @@
     private string Status = "OK";
     private string Answer = "System redo. Mata in förfrågan för överlevnadsstrategi.";
 
-    // Vi behåller din smarta Question-logik
+    
     private string Question => string.IsNullOrWhiteSpace(userInput)
         ? (string.IsNullOrWhiteSpace(question) ? "Hur prioriterar vi mat, vatten och värme första dygnet?" : question!)
         : userInput;
