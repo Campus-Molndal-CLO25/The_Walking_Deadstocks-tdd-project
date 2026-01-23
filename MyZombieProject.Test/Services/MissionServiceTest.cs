@@ -44,6 +44,6 @@ public class MissionServiceTests
 
         // Assert
         Assert.Equal(10, service.GlobalLog.Count);
-        Assert.DoesNotContain(service.GlobalLog, x => x.Contains("Log 1"));
+        Assert.DoesNotContain(service.GlobalLog, x => x.EndsWith("Log 1"));
     }
 }
