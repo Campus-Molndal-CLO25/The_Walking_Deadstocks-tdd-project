@@ -49,6 +49,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "QuickStart", "QuickStart", "{CC623CA2-0820-4FCF-9D2B-4611C697B269}"
 	ProjectSection(SolutionItems) = preProject
 		SETUP_database.md = SETUP_database.md
+		TESTCOVERAGE.md = TESTCOVERAGE.md
 	EndProjectSection
 EndProject
 Global
