@@ -23,19 +23,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User_Stories", "User_Storie
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sprint_Planning", "Sprint_Planning", "{DCCC8590-42BF-484D-8D4C-08789565D2A3}"
+	ProjectSection(SolutionItems) = preProject
+		Planning_Sprint1.md = Planning_Sprint1.md
+		Planning_Sprint2.md = Planning_Sprint2.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Daily_Standups", "Daily_Standups", "{EC47BAAE-063D-47B7-86FF-1929CFAFAB1E}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2025-01-06.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2025-01-06.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-05.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-05.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-09.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-09.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-10.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-10.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-13.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-13.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-14.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-14.md
-		..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-15.md = ..\..\..\OneDrive\Skrivbord\Daily Standup meetings\# Daily Standup 2026-01-15.md
+		DailyStandup_260109.md = DailyStandup_260109.md
+		DailyStandup_260107.md = DailyStandup_260107.md
+		DailyStandup_260112.md = DailyStandup_260112.md
+		DailyStandup_260116.md = DailyStandup_260116.md
+		DailyStandup_260121.md = DailyStandup_260121.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Retrospectives", "Retrospectives", "{0ED572E4-ECA6-4FFC-A7AD-0D081ACAA1C7}"
+	ProjectSection(SolutionItems) = preProject
+		Retrospective_Sprint1.md = Retrospective_Sprint1.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reflections", "Reflections", "{6D1AE31A-E186-461A-AC04-C9ACB51DC163}"
 EndProject
